@@ -25,7 +25,7 @@ const (
 			name TEXT NOT NULL,
 			price NUMERIC NOT NULL,
 			stock INT NOT NULL,
-			image_url TEXT NOT NULL
+			image_url TEXT
 		)`
 
 	SchemaOrders = `
