@@ -20,6 +20,11 @@ func NewUserHandler(repo postgres.UserRepository) *UserHandler {
 
 func (h *UserHandler) SignUp() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		var u models.User
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -42,6 +47,11 @@ func (h *UserHandler) SignUp() http.HandlerFunc {
 
 func (h *UserHandler) SignIn() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		var u models.User
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -74,8 +84,13 @@ func (h *UserHandler) SignIn() http.HandlerFunc {
 	}
 }
 
-func (h *UserHandler) GetAllTasks() http.HandlerFunc {
+func (h *UserHandler) GetAllUsers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		users, err := h.repo.GetAllUsers()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -89,6 +104,11 @@ func (h *UserHandler) GetAllTasks() http.HandlerFunc {
 
 func (h *UserHandler) DeleteUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		var u models.User
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
