@@ -129,18 +129,3 @@ func (r *UserRepository) DeleteUser(u models.User) error {
 
 	return nil
 }
-
-func (r *UserRepository) AddJWT(u models.User, token string) error {
-	query := `
-		UPDATE users
-		SET jwt = $2
-		WHERE username = $1
-	`
-
-	_, err := r.db.Exec(query, u.Username, token)
-	if err != nil {
-		return fmt.Errorf("error updating jwt in the database: %w", err)
-	}
-
-	return nil
-}
