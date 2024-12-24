@@ -16,7 +16,6 @@ const (
 			username TEXT NOT NULL UNIQUE,
 			email TEXT NOT NULL UNIQUE,
 			password TEXT NOT NULL,
-			jwt TEXT
 		)`
 
 	SchemaFlowers = `
@@ -79,7 +78,7 @@ func InitTables(db *sql.DB) error {
 	for _, schema := range schemas {
 		_, err := db.Exec(schema)
 		if err != nil {
-			return fmt.Errorf("error exectuting schemas: %v", err)
+			return fmt.Errorf("error exectuting schema: %v", err)
 		}
 	}
 
