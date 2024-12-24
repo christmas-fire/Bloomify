@@ -70,11 +70,6 @@ func (h *UserHandler) SignIn() http.HandlerFunc {
 			return
 		}
 
-		if err := h.repo.AddJWT(u, token); err != nil {
-			http.Error(w, "error add JWT into database", http.StatusInternalServerError)
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(token)

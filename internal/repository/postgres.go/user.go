@@ -21,12 +21,15 @@ func ValidateUser(u models.User) error {
 	if len(u.Username) < 3 {
 		return fmt.Errorf("username must have at least 3 characters")
 	}
+
 	if len(u.Password) < 8 {
 		return fmt.Errorf("password must have at least 8 characters")
 	}
+
 	if !strings.Contains(u.Email, "@") {
 		return fmt.Errorf("invalid email format")
 	}
+	
 	return nil
 }
 
