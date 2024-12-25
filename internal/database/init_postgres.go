@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/christmas-fire/Bloomify/config"
+	"github.com/christmas-fire/Bloomify/configs"
 	_ "github.com/lib/pq"
 )
 
@@ -15,7 +15,7 @@ const (
 			id SERIAL PRIMARY KEY,
 			username TEXT NOT NULL UNIQUE,
 			email TEXT NOT NULL UNIQUE,
-			password TEXT NOT NULL,
+			password TEXT NOT NULL
 		)`
 
 	SchemaFlowers = `
@@ -49,8 +49,8 @@ const (
 
 var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
 
-func InitDB() *sql.DB {
-	cfg, err := config.LoadConfig("./config")
+func InitPostgres() *sql.DB {
+	cfg, err := configs.LoadConfigPostgres("./configs")
 	if err != nil {
 		log.Fatal(err)
 	}

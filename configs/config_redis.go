@@ -1,4 +1,4 @@
-package config
+package configs
 
 import (
 	"fmt"
@@ -6,17 +6,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-type PostgreSQLConfig struct {
-	User     string `yaml:"user"`
+type RedisConfig struct {
+	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
-	Database string `yaml:"database"`
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
-	Sslmode  string `yaml:"sslmode"`
+	DB       int    `yaml:"db"`
 }
 
-func LoadConfig(path string) (*PostgreSQLConfig, error) {
-	viper.SetConfigName("config")
+func LoadConfigRedis(path string) (*RedisConfig, error) {
+	viper.SetConfigName("config_redis")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(path)
 
@@ -24,7 +21,7 @@ func LoadConfig(path string) (*PostgreSQLConfig, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	var config PostgreSQLConfig
+	var config RedisConfig
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("error decode config file: %w", err)
 	}

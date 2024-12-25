@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -10,10 +12,13 @@ import (
 )
 
 func main() {
-	db := database.InitDB()
+	db := database.InitPostgres()
 	if err := database.InitTables(db); err != nil {
 		log.Fatal(err)
 	}
+
+	client := database.InitRedis(context.Background())
+	fmt.Println(client)
 
 	userRepo := postgres.NewUserRepository(db)
 	userHandler := api.NewUserHandler(*userRepo)
