@@ -78,7 +78,7 @@ func (h *FlowerHandler) GetFlowerByID() http.HandlerFunc {
 
 		id, err := strconv.Atoi(path)
 		if err != nil {
-			http.Error(w, "invalid user ID", http.StatusBadRequest)
+			http.Error(w, "invalid flower ID", http.StatusBadRequest)
 			return
 		}
 
