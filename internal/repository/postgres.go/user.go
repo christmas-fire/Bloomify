@@ -29,7 +29,7 @@ func ValidateUser(u models.User) error {
 	if !strings.Contains(u.Email, "@") {
 		return fmt.Errorf("invalid email format")
 	}
-	
+
 	return nil
 }
 
@@ -119,15 +119,15 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) DeleteUser(u models.User) error {
+func (r *UserRepository) DeleteUserByID(id int) error {
 	query := `
 		DELETE FROM users
-		WHERE username = $1
+		WHERE id = $1
 	`
 
-	_, err := r.db.Exec(query, u.Username)
+	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("error delete user '%s': %v", u.Username, err)
+		return fmt.Errorf("error deleting user with id '%d': %v", id, err)
 	}
 
 	return nil
