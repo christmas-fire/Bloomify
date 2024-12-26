@@ -8,7 +8,7 @@ type UserRepository interface {
 	Register(u models.User) error
 	Login(u models.User) error
 	GetAllUsers() ([]models.User, error)
-	DeleteUser(u models.User) error
+	DeleteUserByID(id int) error
 	AddJWT(u models.User, token string) error
 }
 
