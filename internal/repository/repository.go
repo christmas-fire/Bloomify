@@ -19,4 +19,5 @@ type FlowerRepository interface {
 	GetFlowersByName(f models.Flower) ([]models.Flower, error)
 	GetFlowersByPrice(f models.Flower) ([]models.Flower, error)
 	GetFlowersByStock(f models.Flower) ([]models.Flower, error)
+	DeleteFlowerByID(id int) error
 }
