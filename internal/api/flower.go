@@ -92,3 +92,119 @@ func (h *FlowerHandler) GetFlowerByID() http.HandlerFunc {
 		json.NewEncoder(w).Encode(flower)
 	}
 }
+
+// ... existing code ...
+
+func (h *FlowerHandler) GetFlowersByName() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		name := r.URL.Query().Get("name")
+		if name == "" {
+			http.Error(w, "name parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		flowers, err := h.repo.GetFlowersByName(models.Flower{Name: name})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(flowers)
+	}
+}
+
+func (h *FlowerHandler) GetFlowersByPrice() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		priceStr := r.URL.Query().Get("price")
+		if priceStr == "" {
+			http.Error(w, "price parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			http.Error(w, "invalid price value", http.StatusBadRequest)
+			return
+		}
+
+		flowers, err := h.repo.GetFlowersByPrice(models.Flower{Price: price})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(flowers)
+	}
+}
+
+func (h *FlowerHandler) GetFlowersByStock() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		stockStr := r.URL.Query().Get("stock")
+		if stockStr == "" {
+			http.Error(w, "stock parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		stock, err := strconv.Atoi(stockStr)
+		if err != nil {
+			http.Error(w, "invalid stock value", http.StatusBadRequest)
+			return
+		}
+
+		flowers, err := h.repo.GetFlowersByStock(models.Flower{Stock: stock})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(flowers)
+	}
+}
+
+func (h *FlowerHandler) DeleteFlowerByID() http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodDelete {
+            http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+            return
+        }
+
+        // Получаем ID из URL path
+        path := strings.TrimPrefix(r.URL.Path, "/flowers/delete/")
+        if path == "" {
+            http.Error(w, "flower ID is required", http.StatusBadRequest)
+            return
+        }
+
+        id, err := strconv.Atoi(path)
+        if err != nil {
+            http.Error(w, "invalid flower ID", http.StatusBadRequest)
+            return
+        }
+
+        if err := h.repo.DeleteFlowerByID(id); err != nil {
+            http.Error(w, err.Error(), http.StatusInternalServerError)
+            return
+        }
+
+        w.WriteHeader(http.StatusNoContent)
+        log.Printf("flower with ID '%d' has been deleted", id)
+    }
+}
