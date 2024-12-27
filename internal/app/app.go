@@ -58,11 +58,15 @@ func initRoutes(userHandler *api.UserHandler, flowerHandler *api.FlowerHandler, 
 	r.Handle("/users/register", userHandler.SignUp())             // Регистрация
 	r.HandleFunc("/users/login", userHandler.SignIn(redisClient)) // Логин
 	r.HandleFunc("/users", userHandler.GetAllUsers())             // Получение всех пользователей
-	r.HandleFunc("/users/delete/{id}", userHandler.DeleteUser())  // Удаление пользователя
+	r.HandleFunc("/users/delete/{id}", userHandler.DeleteUser())  // Удаление пользователя по ID
 
 	r.HandleFunc("/flowers/add", flowerHandler.AddFlower())      // Добавление нового цветка
 	r.HandleFunc("/flowers", flowerHandler.GetAllFlowers())      // Получение всех цветов
 	r.HandleFunc("/flowers/{id}", flowerHandler.GetFlowerByID()) // Получение цветка по ID
+	r.HandleFunc("/flowers/search/name", flowerHandler.GetFlowersByName())   // Поиск цветов по имени
+    r.HandleFunc("/flowers/search/price", flowerHandler.GetFlowersByPrice()) // Поиск цветов по цене
+    r.HandleFunc("/flowers/search/stock", flowerHandler.GetFlowersByStock()) // Поиск цветов по наличию
+	r.HandleFunc("/flowers/delete/{id}", flowerHandler.DeleteFlowerByID()) // Удаление цветка по ID
 
 	return r
 }
