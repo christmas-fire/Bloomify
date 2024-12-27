@@ -14,14 +14,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// Обработчик пользователей
 type UserHandler struct {
 	repo postgres.UserRepository
 }
 
+// Создание нового обработчика пользователей
 func NewUserHandler(repo postgres.UserRepository) *UserHandler {
 	return &UserHandler{repo: repo}
 }
 
+// Регистрация пользователя
 func (h *UserHandler) SignUp() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -50,6 +53,7 @@ func (h *UserHandler) SignUp() http.HandlerFunc {
 	}
 }
 
+// Вход пользователя
 func (h *UserHandler) SignIn(clint *redis.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -89,6 +93,7 @@ func (h *UserHandler) SignIn(clint *redis.Client) http.HandlerFunc {
 	}
 }
 
+// Получение всех пользователей
 func (h *UserHandler) GetAllUsers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -108,6 +113,7 @@ func (h *UserHandler) GetAllUsers() http.HandlerFunc {
 	}
 }
 
+// Удаление пользователя
 func (h *UserHandler) DeleteUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {

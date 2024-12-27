@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// Инициализация Redis
 func InitRedis(ctx context.Context) *redis.Client {
 	cfg, err := configs.LoadConfigRedis("./configs")
 	if err != nil {

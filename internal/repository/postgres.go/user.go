@@ -9,14 +9,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Репозиторий для работы с пользователями
 type UserRepository struct {
 	db *sql.DB
 }
 
+// Создание нового репозитория для работы с пользователями
 func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+// Валидация пользователя
 func ValidateUser(u models.User) error {
 	if len(u.Username) < 3 {
 		return fmt.Errorf("username must have at least 3 characters")
@@ -33,6 +36,7 @@ func ValidateUser(u models.User) error {
 	return nil
 }
 
+// Регистрация пользователя
 func (r *UserRepository) Register(u models.User) error {
 	if err := ValidateUser(u); err != nil {
 		return fmt.Errorf("invalid user data: %w", err)
@@ -72,6 +76,7 @@ func (r *UserRepository) Register(u models.User) error {
 	return nil
 }
 
+// Вход пользователя
 func (r *UserRepository) Login(u models.User) error {
 	query := `
 		SELECT password FROM users WHERE username = $1
@@ -92,6 +97,7 @@ func (r *UserRepository) Login(u models.User) error {
 	return nil
 }
 
+// Получение всех пользователей
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	query := `
 		SELECT id, username, email, password FROM users
@@ -119,6 +125,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
+// Удаление пользователя по ID
 func (r *UserRepository) DeleteUserByID(id int) error {
 	query := `
 		DELETE FROM users

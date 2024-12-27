@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Конфигурация PostgreSQL
 type PostgreSQLConfig struct {
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
@@ -15,6 +16,7 @@ type PostgreSQLConfig struct {
 	Sslmode  string `yaml:"sslmode"`
 }
 
+// Загрузка конфигурации PostgreSQL
 func LoadConfigPostgres(path string) (*PostgreSQLConfig, error) {
 	viper.SetConfigName("config_postgres")
 	viper.SetConfigType("yaml")

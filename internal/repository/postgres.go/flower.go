@@ -7,14 +7,17 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/models"
 )
 
+// Репозиторий для работы с цветами
 type FlowerRepository struct {
 	db *sql.DB
 }
 
+// Создание нового репозитория для работы с цветами
 func NewFlowerRepository(db *sql.DB) *FlowerRepository {
 	return &FlowerRepository{db: db}
 }
 
+// Валидация цветка
 func ValidateFlower(f models.Flower) error {
 	if f.Name == "" {
 		return fmt.Errorf("name can't be empty")
@@ -28,6 +31,7 @@ func ValidateFlower(f models.Flower) error {
 	return nil
 }
 
+// Добавление цветка
 func (r *FlowerRepository) AddFlower(f models.Flower) error {
 	checkQuery := `
 		SELECT EXISTS (
@@ -61,6 +65,7 @@ func (r *FlowerRepository) AddFlower(f models.Flower) error {
 	return nil
 }
 
+// Получение всех цветов
 func (r *FlowerRepository) GetAllFlowers() ([]models.Flower, error) {
 	query := `
 		SELECT id, name, price, stock FROM flowers
@@ -88,6 +93,7 @@ func (r *FlowerRepository) GetAllFlowers() ([]models.Flower, error) {
 	return flowers, nil
 }
 
+// Получение цветка по ID
 func (r *FlowerRepository) GetFlowerByID(id int) (*models.Flower, error) {
 	query := `
 		SELECT id, name, price, stock
@@ -107,6 +113,7 @@ func (r *FlowerRepository) GetFlowerByID(id int) (*models.Flower, error) {
 	return &f, nil
 }
 
+// Получение цветов по названию
 func (r *FlowerRepository) GetFlowersByName(f models.Flower) ([]models.Flower, error) {
     query := `
         SELECT id, name, price, stock
@@ -132,6 +139,7 @@ func (r *FlowerRepository) GetFlowersByName(f models.Flower) ([]models.Flower, e
     return flowers, nil
 }
 
+// Получение цветов по цене
 func (r *FlowerRepository) GetFlowersByPrice(f models.Flower) ([]models.Flower, error) {
     query := `
         SELECT id, name, price, stock
@@ -158,6 +166,7 @@ func (r *FlowerRepository) GetFlowersByPrice(f models.Flower) ([]models.Flower, 
     return flowers, nil
 }
 
+// Получение цветов по количеству в наличии
 func (r *FlowerRepository) GetFlowersByStock(f models.Flower) ([]models.Flower, error) {
     query := `
         SELECT id, name, price, stock
@@ -184,6 +193,7 @@ func (r *FlowerRepository) GetFlowersByStock(f models.Flower) ([]models.Flower, 
     return flowers, nil
 }
 
+// Удаление цветка по ID
 func (r *FlowerRepository) DeleteFlowerByID(id int) error {
 	query := `
 		DELETE FROM flowers

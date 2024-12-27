@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Константы для схем базы данных
 const (
 	SchemaUsers = `
 		CREATE TABLE IF NOT EXISTS users (
@@ -47,8 +48,10 @@ const (
 		)`
 )
 
+// Схемы для инициализации базы данных
 var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
 
+// Инициализация PostgreSQL
 func InitPostgres() *sql.DB {
 	cfg, err := configs.LoadConfigPostgres("./configs")
 	if err != nil {
@@ -74,6 +77,7 @@ func InitPostgres() *sql.DB {
 	return db
 }
 
+// Инициализация таблиц
 func InitTables(db *sql.DB) error {
 	for _, schema := range schemas {
 		_, err := db.Exec(schema)

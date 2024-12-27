@@ -12,6 +12,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// Структура приложения
 type App struct {
 	db            *sql.DB
 	client        *redis.Client
@@ -22,6 +23,7 @@ type App struct {
 	server        *http.Server
 }
 
+// Создание нового приложения
 func NewApp() (*App, error) {
 	db := database.InitPostgres()
 	if err := database.InitTables(db); err != nil {
@@ -52,6 +54,7 @@ func NewApp() (*App, error) {
 	}, nil
 }
 
+// Инициализация маршрутов
 func initRoutes(userHandler *api.UserHandler, flowerHandler *api.FlowerHandler, redisClient *redis.Client) http.Handler {
 	r := http.DefaultServeMux
 
@@ -71,11 +74,13 @@ func initRoutes(userHandler *api.UserHandler, flowerHandler *api.FlowerHandler, 
 	return r
 }
 
+// Запуск сервера
 func (a *App) Run() error {
 	log.Println("Starting server on :8080...")
 	return a.server.ListenAndServe()
 }
 
+// Завершение работы приложения
 func (a *App) Shutdown(ctx context.Context) error {
 	log.Println("Shutting down server...")
 	if err := a.server.Shutdown(ctx); err != nil {
