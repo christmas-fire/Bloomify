@@ -133,6 +133,6 @@ func (h *UserHandler) DeleteUser() http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
-		log.Printf("user with id '%d' has deleted", id)
+		log.Printf("user with ID '%d' has deleted", id)
 	}
 }
