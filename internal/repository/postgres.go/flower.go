@@ -106,3 +106,94 @@ func (r *FlowerRepository) GetFlowerByID(id int) (*models.Flower, error) {
 
 	return &f, nil
 }
+
+func (r *FlowerRepository) GetFlowersByName(f models.Flower) ([]models.Flower, error) {
+    query := `
+        SELECT id, name, price, stock
+        FROM flowers
+        WHERE name ILIKE $1
+    `
+    
+    rows, err := r.db.Query(query, "%"+f.Name+"%")
+    if err != nil {
+        return nil, fmt.Errorf("error querying flowers by name: %w", err)
+    }
+    defer rows.Close()
+
+    var flowers []models.Flower
+    for rows.Next() {
+        var flower models.Flower
+        if err := rows.Scan(&flower.Id, &flower.Name, &flower.Price, &flower.Stock); err != nil {
+            return nil, fmt.Errorf("error scanning flower row: %w", err)
+        }
+        flowers = append(flowers, flower)
+    }
+
+    return flowers, nil
+}
+
+func (r *FlowerRepository) GetFlowersByPrice(f models.Flower) ([]models.Flower, error) {
+    query := `
+        SELECT id, name, price, stock
+        FROM flowers
+        WHERE price <= $1
+        ORDER BY price ASC
+    `
+    
+    rows, err := r.db.Query(query, f.Price)
+    if err != nil {
+        return nil, fmt.Errorf("error querying flowers by price: %w", err)
+    }
+    defer rows.Close()
+
+    var flowers []models.Flower
+    for rows.Next() {
+        var flower models.Flower
+        if err := rows.Scan(&flower.Id, &flower.Name, &flower.Price, &flower.Stock); err != nil {
+            return nil, fmt.Errorf("error scanning flower row: %w", err)
+        }
+        flowers = append(flowers, flower)
+    }
+
+    return flowers, nil
+}
+
+func (r *FlowerRepository) GetFlowersByStock(f models.Flower) ([]models.Flower, error) {
+    query := `
+        SELECT id, name, price, stock
+        FROM flowers
+        WHERE stock >= $1
+        ORDER BY stock DESC
+    `
+    
+    rows, err := r.db.Query(query, f.Stock)
+    if err != nil {
+        return nil, fmt.Errorf("error querying flowers by stock: %w", err)
+    }
+    defer rows.Close()
+
+    var flowers []models.Flower
+    for rows.Next() {
+        var flower models.Flower
+        if err := rows.Scan(&flower.Id, &flower.Name, &flower.Price, &flower.Stock); err != nil {
+            return nil, fmt.Errorf("error scanning flower row: %w", err)
+        }
+        flowers = append(flowers, flower)
+    }
+
+    return flowers, nil
+}
+
+func (r *FlowerRepository) DeleteFlowerByID(id int) error {
+	query := `
+		DELETE FROM flowers
+		WHERE id = $1
+	`
+
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("error deleting flower with id '%d': %v", id, err)
+	}
+
+	return nil
+}
