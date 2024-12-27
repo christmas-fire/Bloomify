@@ -7,8 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Секретный ключ для JWT
 var jwtSecret = []byte("your_secret_key")
 
+// Генерация JWT токена
 func GenerateJWT(username string) (string, error) {
 	claims := jwt.MapClaims{
 		"username": username,
@@ -27,6 +29,7 @@ func GenerateJWT(username string) (string, error) {
 	return tokenString, nil
 }
 
+// Валидация JWT токена
 func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

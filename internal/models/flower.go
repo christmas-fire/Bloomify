@@ -1,9 +1,10 @@
 package models
 
+// Модель цветка
 type Flower struct {
-	Id       int     `json:"id"`
-	Name     string  `json:"name"`
-	Price    float64 `json:"price"`
-	Stock    int     `json:"stock"`
-	ImageUrl string  `json:"image_url"`
+	Id       int     `json:"id"` // ID цветка
+	Name     string  `json:"name"` // Название цветка
+	Price    float64 `json:"price"` // Цена цветка
+	Stock    int     `json:"stock"` // Количество в наличии
+	ImageUrl string  `json:"image_url"` // URL изображения цветка
 }

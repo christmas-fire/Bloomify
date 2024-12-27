@@ -6,12 +6,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Конфигурация Redis
 type RedisConfig struct {
 	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
 }
 
+// Загрузка конфигурации Redis
 func LoadConfigRedis(path string) (*RedisConfig, error) {
 	viper.SetConfigName("config_redis")
 	viper.SetConfigType("yaml")

@@ -11,14 +11,17 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/repository/postgres.go"
 )
 
+// Обработчик цветов
 type FlowerHandler struct {
 	repo postgres.FlowerRepository
 }
 
+// Создание нового обработчика цветов
 func NewFlowerHandler(repo postgres.FlowerRepository) *FlowerHandler {
 	return &FlowerHandler{repo: repo}
 }
 
+// Добавление цветка
 func (h *FlowerHandler) AddFlower() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -45,6 +48,7 @@ func (h *FlowerHandler) AddFlower() http.HandlerFunc {
 	}
 }
 
+// Получение всех цветов
 func (h *FlowerHandler) GetAllFlowers() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -63,6 +67,7 @@ func (h *FlowerHandler) GetAllFlowers() http.HandlerFunc {
 	}
 }
 
+// Получение цветка по ID
 func (h *FlowerHandler) GetFlowerByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -93,8 +98,7 @@ func (h *FlowerHandler) GetFlowerByID() http.HandlerFunc {
 	}
 }
 
-// ... existing code ...
-
+// Получение цветов по названию
 func (h *FlowerHandler) GetFlowersByName() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -119,6 +123,7 @@ func (h *FlowerHandler) GetFlowersByName() http.HandlerFunc {
 	}
 }
 
+// Получение цветов по цене
 func (h *FlowerHandler) GetFlowersByPrice() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -149,6 +154,7 @@ func (h *FlowerHandler) GetFlowersByPrice() http.HandlerFunc {
 	}
 }
 
+// Получение цветов по количеству в наличии
 func (h *FlowerHandler) GetFlowersByStock() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -179,10 +185,11 @@ func (h *FlowerHandler) GetFlowersByStock() http.HandlerFunc {
 	}
 }
 
+// Удаление цветка по ID
 func (h *FlowerHandler) DeleteFlowerByID() http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        if r.Method != http.MethodDelete {
-            http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
             return
         }
 

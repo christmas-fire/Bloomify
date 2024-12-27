@@ -7,11 +7,13 @@ import (
 )
 
 func main() {
+	// Инициализация приложения
 	app, err := app.NewApp()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// Запуск сервера
 	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
