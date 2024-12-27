@@ -21,12 +21,15 @@ func ValidateUser(u models.User) error {
 	if len(u.Username) < 3 {
 		return fmt.Errorf("username must have at least 3 characters")
 	}
+
 	if len(u.Password) < 8 {
 		return fmt.Errorf("password must have at least 8 characters")
 	}
+
 	if !strings.Contains(u.Email, "@") {
 		return fmt.Errorf("invalid email format")
 	}
+
 	return nil
 }
 
@@ -116,30 +119,15 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) DeleteUser(u models.User) error {
+func (r *UserRepository) DeleteUserByID(id int) error {
 	query := `
 		DELETE FROM users
-		WHERE username = $1
+		WHERE id = $1
 	`
 
-	_, err := r.db.Exec(query, u.Username)
+	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("error delete user '%s': %v", u.Username, err)
-	}
-
-	return nil
-}
-
-func (r *UserRepository) AddJWT(u models.User, token string) error {
-	query := `
-		UPDATE users
-		SET jwt = $2
-		WHERE username = $1
-	`
-
-	_, err := r.db.Exec(query, u.Username, token)
-	if err != nil {
-		return fmt.Errorf("error updating jwt in the database: %w", err)
+		return fmt.Errorf("error deleting user with id '%d': %v", id, err)
 	}
 
 	return nil

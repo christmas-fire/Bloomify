@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/christmas-fire/Bloomify/config"
+	"github.com/christmas-fire/Bloomify/configs"
 	_ "github.com/lib/pq"
 )
 
@@ -15,8 +15,7 @@ const (
 			id SERIAL PRIMARY KEY,
 			username TEXT NOT NULL UNIQUE,
 			email TEXT NOT NULL UNIQUE,
-			password TEXT NOT NULL,
-			jwt TEXT
+			password TEXT NOT NULL
 		)`
 
 	SchemaFlowers = `
@@ -25,7 +24,7 @@ const (
 			name TEXT NOT NULL,
 			price NUMERIC NOT NULL,
 			stock INT NOT NULL,
-			image_url TEXT NOT NULL
+			image_url TEXT
 		)`
 
 	SchemaOrders = `
@@ -50,8 +49,8 @@ const (
 
 var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
 
-func InitDB() *sql.DB {
-	cfg, err := config.LoadConfig("./config")
+func InitPostgres() *sql.DB {
+	cfg, err := configs.LoadConfigPostgres("./configs")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,7 +78,7 @@ func InitTables(db *sql.DB) error {
 	for _, schema := range schemas {
 		_, err := db.Exec(schema)
 		if err != nil {
-			return fmt.Errorf("error exectuting schemas: %v", err)
+			return fmt.Errorf("error exectuting schema: %v", err)
 		}
 	}
 
