@@ -1,4 +1,4 @@
-package api
+package delivery
 
 import (
 	"encoding/json"
@@ -190,28 +190,28 @@ func (h *FlowerHandler) DeleteFlowerByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-            return
-        }
+			return
+		}
 
-        // Получаем ID из URL path
-        path := strings.TrimPrefix(r.URL.Path, "/flowers/delete/")
-        if path == "" {
-            http.Error(w, "flower ID is required", http.StatusBadRequest)
-            return
-        }
+		// Получаем ID из URL path
+		path := strings.TrimPrefix(r.URL.Path, "/flowers/delete/")
+		if path == "" {
+			http.Error(w, "flower ID is required", http.StatusBadRequest)
+			return
+		}
 
-        id, err := strconv.Atoi(path)
-        if err != nil {
-            http.Error(w, "invalid flower ID", http.StatusBadRequest)
-            return
-        }
+		id, err := strconv.Atoi(path)
+		if err != nil {
+			http.Error(w, "invalid flower ID", http.StatusBadRequest)
+			return
+		}
 
-        if err := h.repo.DeleteFlowerByID(id); err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-        }
+		if err := h.repo.DeleteFlowerByID(id); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-        w.WriteHeader(http.StatusNoContent)
-        log.Printf("flower with ID '%d' has been deleted", id)
-    }
+		w.WriteHeader(http.StatusNoContent)
+		log.Printf("flower with ID '%d' has been deleted", id)
+	}
 }
