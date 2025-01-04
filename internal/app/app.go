@@ -8,7 +8,7 @@ import (
 
 	"github.com/christmas-fire/Bloomify/internal/database"
 	delivery "github.com/christmas-fire/Bloomify/internal/delivery/http/v1"
-	"github.com/christmas-fire/Bloomify/internal/repository/postgres.go"
+	"github.com/christmas-fire/Bloomify/internal/repository/postgres"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -58,18 +58,18 @@ func NewApp() (*App, error) {
 func initRoutes(userHandler *delivery.UserHandler, flowerHandler *delivery.FlowerHandler, redisClient *redis.Client) http.Handler {
 	r := http.DefaultServeMux
 
-	r.Handle("/users/register", userHandler.SignUp())             // Регистрация
-	r.HandleFunc("/users/login", userHandler.SignIn(redisClient)) // Логин
-	r.HandleFunc("/users", userHandler.GetAllUsers())             // Получение всех пользователей
-	r.HandleFunc("/users/delete/{id}", userHandler.DeleteUser())  // Удаление пользователя по ID
+	r.Handle("/api/v1/users/sign-up", userHandler.SignUp())                // Регистрация
+	r.HandleFunc("/api/v1/users/sign-in", userHandler.SignIn(redisClient)) // Логин
+	r.HandleFunc("/api/v1/users", userHandler.GetAllUsers())               // Получение всех пользователей
+	r.HandleFunc("/api/v1/users/delete/{id}", userHandler.DeleteUser())    // Удаление пользователя по ID
 
-	r.HandleFunc("/flowers/add", flowerHandler.AddFlower())                  // Добавление нового цветка
-	r.HandleFunc("/flowers", flowerHandler.GetAllFlowers())                  // Получение всех цветов
-	r.HandleFunc("/flowers/{id}", flowerHandler.GetFlowerByID())             // Получение цветка по ID
-	r.HandleFunc("/flowers/search/name", flowerHandler.GetFlowersByName())   // Поиск цветов по имени
-	r.HandleFunc("/flowers/search/price", flowerHandler.GetFlowersByPrice()) // Поиск цветов по цене
-	r.HandleFunc("/flowers/search/stock", flowerHandler.GetFlowersByStock()) // Поиск цветов по наличию
-	r.HandleFunc("/flowers/delete/{id}", flowerHandler.DeleteFlowerByID())   // Удаление цветка по ID
+	r.HandleFunc("/api/v1/flowers/add", flowerHandler.AddFlower())                  // Добавление нового цветка
+	r.HandleFunc("/api/v1/flowers", flowerHandler.GetAllFlowers())                  // Получение всех цветов
+	r.HandleFunc("/api/v1/flowers/{id}", flowerHandler.GetFlowerByID())             // Получение цветка по ID
+	r.HandleFunc("/api/v1/flowers/search/name", flowerHandler.GetFlowersByName())   // Поиск цветов по имени
+	r.HandleFunc("/api/v1/flowers/search/price", flowerHandler.GetFlowersByPrice()) // Поиск цветов по цене
+	r.HandleFunc("/api/v1/flowers/search/stock", flowerHandler.GetFlowersByStock()) // Поиск цветов по наличию
+	r.HandleFunc("/api/v1/flowers/delete/{id}", flowerHandler.DeleteFlowerByID())   // Удаление цветка по ID
 
 	return r
 }

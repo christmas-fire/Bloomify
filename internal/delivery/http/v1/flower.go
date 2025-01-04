@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
-	"github.com/christmas-fire/Bloomify/internal/repository/postgres.go"
+	"github.com/christmas-fire/Bloomify/internal/repository/postgres"
 )
 
 // Обработчик цветов
