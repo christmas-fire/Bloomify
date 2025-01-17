@@ -1,9 +1,7 @@
 # Установите переменную окружения для Go
 GO ?= go
-
 # Путь к исходникам
 SRC_DIRS := ./...
-
 # Цель по умолчанию
 default: run
 
@@ -13,7 +11,7 @@ run:
 	@swag init -g cmd/main.go
 	@echo "Documentation generated."
 	@echo "Running Bloomify..."
-	@sudo docker-compose up --build
+	@docker-compose up --build
 
 # Цель для проверки стиля кода
 lint:
