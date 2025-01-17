@@ -1,0 +1,11 @@
+# Серверные настройки
+port: ":8080"
+
+# Настройки подключения к PostgreSQL
+postgres:
+  user:     "postgres"
+  password: "290605"
+  database: "bloomify"
+  host:     "db" # для docker - "db" | для локального запуска - "localhost"
+  port:     "5432"
+  sslmode:  "disable"
