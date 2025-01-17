@@ -17,25 +17,14 @@ jobs:
         run: |
           go install golang.org/x/lint/golint@latest
           echo "$HOME/go/bin" >> $GITHUB_PATH
-      - name: Check codestyle
+      - name: Check code style
         run: golint ./...
-
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22'
-      - name: Format code
-        run: go fmt ./...
 
   build-docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Build Docker image
         run: docker build -t bloomify-app .
