@@ -7,20 +7,13 @@ SRC_DIRS := ./...
 # Цель по умолчанию
 default: run
 
-# Цель для сборки приложения
-build:
-	@echo "Building Bloomify..."
-	@mkdir -p bin
-	@$(GO) build -o ./bin/bloomify ./cmd
-	@echo "Build complete."
-
 # Цель для запуска приложения
 run:
 	@echo "Generating documentation with swag..."
 	@swag init -g cmd/main.go
 	@echo "Documentation generated."
 	@echo "Running Bloomify..."
-	@$(GO) run $(SRC_DIRS)
+	@sudo docker-compose up --build
 
 # Цель для проверки стиля кода
 lint:
@@ -32,9 +25,3 @@ lint:
 fmt:
 	@echo "Formatting code..."
 	@$(GO) fmt $(SRC_DIRS)
-
-# Цель для очистки временных файлов
-clean:
-	@echo "Cleaning up..."
-	@rm -rf bin/
-	@echo "Cleanup complete."

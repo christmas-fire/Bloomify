@@ -61,7 +61,7 @@ func NewApp() (*App, error) {
 
 // Запуск сервера
 func (a *App) Run() error {
-	logrus.Println("Starting server on :8080...")
+	logrus.Printf("Starting server on %s...", viper.GetString("port"))
 	return a.server.ListenAndServe()
 }
 
