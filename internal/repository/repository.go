@@ -2,24 +2,43 @@ package repository
 
 import (
 	"github.com/christmas-fire/Bloomify/internal/models"
+	"github.com/jmoiron/sqlx"
 )
 
-// Репозиторий для работы с пользователями
-type UserRepository interface {
-	Register(u models.User) error // Регистрация пользователя
-	Login(u models.User) error // Вход пользователя
-	GetAllUsers() ([]models.User, error) // Получение всех пользователей
-	DeleteUserByID(id int) error // Удаление пользователя по ID
-	AddJWT(u models.User, token string) error // Добавление JWT токена пользователю
+type Auth interface {
+	CreateUser(user models.User) (int, error)
+	GetUser(username, password string) (models.User, error)
 }
 
-// Репозиторий для работы с цветами
-type FlowerRepository interface {
-	AddFlower(f models.Flower) error // Добавление цветка
-	GetAllFlowers() ([]models.Flower, error) // Получение всех цветов
-	GetFlowerByID(id int) (*models.Flower, error) // Получение цветка по ID
-	GetFlowersByName(f models.Flower) ([]models.Flower, error) // Получение цветов по названию
-	GetFlowersByPrice(f models.Flower) ([]models.Flower, error) // Получение цветов по цене
-	GetFlowersByStock(f models.Flower) ([]models.Flower, error) // Получение цветов по количеству в наличии
-	DeleteFlowerByID(id int) error // Удаление цветка по ID
+type User interface {
+	GetAll() ([]models.User, error)
+	GetById(userId int) (models.User, error)
+	Delete(userId int) error
+}
+
+type Flower interface {
+	CreateFlower(flower models.Flower) (int, error) // Добавление цветка
+	GetAll() ([]models.Flower, error)
+	GetById(flowerId int) (models.Flower, error)
+	Delete(flowerId int) error
+	// GetAll() ([]models.Flower, error)                  // Получение всех цветов
+	// GetFlowerByID(flowerId int) (models.Flower, error) // Получение цветка по ID
+	// DeleteFlowerByID(flowerId int) error               // Удаление цветка по ID
+	// GetFlowersByName(name string) ([]models.Flower, error)  // Получение цветов по названию
+	// GetFlowersByPrice(price float64) ([]models.Flower, error) // Получение цветов по цене
+	// GetFlowersByStock(stock int) ([]models.Flower, error) // Получение цветов по количеству в наличии
+}
+
+type Repository struct {
+	Auth
+	User
+	Flower
+}
+
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{
+		Auth:   NewAuthPostgres(db),
+		User:   NewUserPostgres(db),
+		Flower: NewFlowerPostgres(db),
+	}
 }

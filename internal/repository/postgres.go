@@ -1,12 +1,11 @@
-package database
+package repository
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 
-	"github.com/christmas-fire/Bloomify/configs"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 )
 
 // Константы для схем базы данных
@@ -21,11 +20,11 @@ const (
 
 	SchemaFlowers = `
 		CREATE TABLE IF NOT EXISTS flowers (
-			id SERIAL PRIMARY KEY,
-			name TEXT NOT NULL,
+			id SERIAL PRIMARY KEY unique,
+			name TEXT NOT NULL unique,
+			description TEXT,
 			price NUMERIC NOT NULL,
-			stock INT NOT NULL,
-			image_url TEXT
+			stock INT NOT NULL
 		)`
 
 	SchemaOrders = `
@@ -51,34 +50,39 @@ const (
 // Схемы для инициализации базы данных
 var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
 
-// Инициализация PostgreSQL
-func InitPostgres() *sql.DB {
-	cfg, err := configs.LoadConfigPostgres("./configs")
-	if err != nil {
-		log.Fatal(err)
-	}
+// Конфигурация PostgreSQL
+type PostgreSQLConfig struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Sslmode  string `yaml:"sslmode"`
+}
 
+// Инициализация PostgreSQL
+func InitPostgreSQL(cfg PostgreSQLConfig) (*sqlx.DB, error) {
 	con := fmt.Sprintf(
 		"user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
 		cfg.User, cfg.Password, cfg.Database, cfg.Host, cfg.Port, cfg.Sslmode,
 	)
 
-	db, err := sql.Open("postgres", con)
+	db, err := sqlx.Open("postgres", con)
 	if err != nil {
-		log.Fatalf("error connect DB: %v", err)
+		return nil, fmt.Errorf("error open db: %s", err.Error())
 	}
 
 	if err := db.Ping(); err != nil {
-		log.Fatalf("DB unvaluable: %v", err)
+		return nil, fmt.Errorf("error connect db: %s", err.Error())
 	}
 
-	log.Println("success connect to DB")
+	logrus.Println("success connect to db")
 
-	return db
+	return db, nil
 }
 
 // Инициализация таблиц
-func InitTables(db *sql.DB) error {
+func InitTables(db *sqlx.DB) error {
 	for _, schema := range schemas {
 		_, err := db.Exec(schema)
 		if err != nil {
@@ -86,7 +90,7 @@ func InitTables(db *sql.DB) error {
 		}
 	}
 
-	log.Println("success executing schemas")
+	logrus.Println("success executing schemas")
 
 	return nil
 }
