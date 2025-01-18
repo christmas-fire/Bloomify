@@ -16,6 +16,10 @@ func NewFlowerService(repo repository.Flower) *FlowerService {
 }
 
 func (s *FlowerService) CreateFlower(flower models.Flower) (int, error) {
+	if err := validateFlower(flower); err != nil {
+		return 0, err
+	}
+
 	return s.repo.CreateFlower(flower)
 }
 

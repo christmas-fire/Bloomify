@@ -24,3 +24,9 @@ lint:
 fmt:
 	@echo "Formatting code..."
 	@$(GO) fmt $(SRC_DIRS)
+
+# Цель для тестирования кода
+test:
+	@echo "Testing code..."
+	@$(GO) install gotest.tools/gotestsum@latest
+	@gotestsum -- -v ./...
