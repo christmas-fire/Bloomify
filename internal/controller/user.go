@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -98,4 +99,62 @@ func (h *Handler) deleteUser(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (h *Handler) updateUserUsername(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateUsernameInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdateUsername(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+func (h *Handler) updateUserPassword(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdatePasswordInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdatePassword(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
 }

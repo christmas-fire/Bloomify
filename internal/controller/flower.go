@@ -137,6 +137,28 @@ func (h *Handler) deleteFlower(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (h *Handler) getFlowersByName(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	name := c.Query("name")
+	if name == "" {
+		newErrorResponse(c, http.StatusBadRequest, "not found query parameter ")
+		return
+	}
+
+	flowers, err := h.services.Flower.GetFlowersByName(name)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, flowers)
+}
+
 // // Получение цветов по названию
 // func (h *FlowerHandler) GetFlowersByName() http.HandlerFunc {
 // 	return func(w http.ResponseWriter, r *http.Request) {

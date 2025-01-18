@@ -35,6 +35,10 @@ func (s *FlowerService) Delete(flowerId int) error {
 	return s.repo.Delete(flowerId)
 }
 
+func (s *FlowerService) GetFlowersByName(name string) ([]models.Flower, error) {
+	return s.repo.GetFlowersByName(name)
+}
+
 func validateFlower(flower models.Flower) error {
 	if flower.Name == "" {
 		return fmt.Errorf("name can't be empty")

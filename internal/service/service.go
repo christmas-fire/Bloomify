@@ -17,6 +17,8 @@ type User interface {
 	GetAll() ([]models.User, error)
 	GetById(userId int) (models.User, error)
 	Delete(userId int) error
+	UpdateUsername(userId int, input models.UpdateUsernameInput) error
+	UpdatePassword(userId int, input models.UpdatePasswordInput) error
 }
 
 type Flower interface {
@@ -24,6 +26,7 @@ type Flower interface {
 	GetAll() ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
 	Delete(flowerId int) error
+	GetFlowersByName(name string) ([]models.Flower, error)
 	// Update(flowerId int, input models.Flower) error
 }
 
