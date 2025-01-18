@@ -13,23 +13,24 @@ type Auth interface {
 type User interface {
 	GetAll() ([]models.User, error)
 	GetById(userId int) (models.User, error)
-	Delete(userId int) error
 	UpdateUsername(userId int, input models.UpdateUsernameInput) error
 	UpdatePassword(userId int, input models.UpdatePasswordInput) error
+	Delete(userId int) error
 }
 
 type Flower interface {
-	CreateFlower(flower models.Flower) (int, error) // Добавление цветка
+	CreateFlower(flower models.Flower) (int, error)
 	GetAll() ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
-	Delete(flowerId int) error
 	GetFlowersByName(name string) ([]models.Flower, error)
-	// GetAll() ([]models.Flower, error)                  // Получение всех цветов
-	// GetFlowerByID(flowerId int) (models.Flower, error) // Получение цветка по ID
-	// DeleteFlowerByID(flowerId int) error               // Удаление цветка по ID
-	// GetFlowersByName(name string) ([]models.Flower, error)  // Получение цветов по названию
-	// GetFlowersByPrice(price float64) ([]models.Flower, error) // Получение цветов по цене
-	// GetFlowersByStock(stock int) ([]models.Flower, error) // Получение цветов по количеству в наличии
+	GetFlowersByDescription(description string) ([]models.Flower, error)
+	GetFlowersByPrice(price float64) ([]models.Flower, error)
+	GetFlowersByStock(stock int64) ([]models.Flower, error)
+	UpdateName(flowerId int, input models.UpdateNameInput) error
+	UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error
+	UpdatePrice(flowerId int, input models.UpdatePriceInput) error
+	UpdateStock(flowerId int, input models.UpdateStockInput) error
+	Delete(flowerId int) error
 }
 
 type Repository struct {

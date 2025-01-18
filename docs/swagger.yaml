@@ -10,6 +10,11 @@ definitions:
     - password
     - username
     type: object
+  controller.statusResponse:
+    properties:
+      status:
+        type: string
+    type: object
   models.Flower:
     properties:
       description:
@@ -26,6 +31,57 @@ definitions:
     - name
     - price
     - stock
+    type: object
+  models.UpdateDescriptionInput:
+    properties:
+      new_description:
+        type: string
+    required:
+    - new_description
+    type: object
+  models.UpdateNameInput:
+    properties:
+      new_name:
+        type: string
+    required:
+    - new_name
+    type: object
+  models.UpdatePasswordInput:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+      username:
+        type: string
+    required:
+    - new_password
+    - old_password
+    - username
+    type: object
+  models.UpdatePriceInput:
+    properties:
+      new_price:
+        type: number
+    required:
+    - new_price
+    type: object
+  models.UpdateStockInput:
+    properties:
+      new_stock:
+        type: integer
+    required:
+    - new_stock
+    type: object
+  models.UpdateUsernameInput:
+    properties:
+      new_username:
+        type: string
+      old_username:
+        type: string
+    required:
+    - new_username
+    - old_username
     type: object
   models.User:
     properties:
@@ -198,6 +254,131 @@ paths:
       summary: Get flower by ID
       tags:
       - flowers
+  /api/flowers/price:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of flowers with prices less than or equal to the
+        specified value
+      parameters:
+      - description: Max Price
+        in: query
+        name: price
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Flower'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search flowers by price
+      tags:
+      - flowers
+  /api/flowers/search:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of flowers by their name
+      parameters:
+      - description: Flower Name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Flower'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search flowers by name
+      tags:
+      - flowers
+  /api/flowers/stock:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of flowers with stock levels less than or equal
+        to the specified value
+      parameters:
+      - description: Max Stock
+        in: query
+        name: stock
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Flower'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search flowers by stock
+      tags:
+      - flowers
   /api/users:
     get:
       consumes:
@@ -302,6 +483,317 @@ paths:
       summary: Get user by ID
       tags:
       - users
+  /api/users/{id}/password:
+    patch:
+      consumes:
+      - application/json
+      description: Update the password of a specific user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Password Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePasswordInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user's password
+      tags:
+      - users
+  /api/users/{id}/username:
+    patch:
+      consumes:
+      - application/json
+      description: Update the username of a specific user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Username Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateUsernameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user's username
+      tags:
+      - users
+  /api/v1/flowers/{id}/description:
+    patch:
+      consumes:
+      - application/json
+      description: Update the description of a specific flower by its ID
+      parameters:
+      - description: Flower ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Flower Description Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateDescriptionInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update flower's description
+      tags:
+      - flowers
+  /api/v1/flowers/{id}/name:
+    patch:
+      consumes:
+      - application/json
+      description: Update the name of a specific flower by its ID
+      parameters:
+      - description: Flower ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Flower Name Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateNameInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update flower's name
+      tags:
+      - flowers
+  /api/v1/flowers/{id}/price:
+    patch:
+      consumes:
+      - application/json
+      description: Update the price of a specific flower by its ID
+      parameters:
+      - description: Flower ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Flower Price Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePriceInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update flower's price
+      tags:
+      - flowers
+  /api/v1/flowers/{id}/stock:
+    patch:
+      consumes:
+      - application/json
+      description: Update the stock level of a specific flower by its ID
+      parameters:
+      - description: Flower ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Flower Stock Input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateStockInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update flower's stock
+      tags:
+      - flowers
+  /api/v1/flowers/search/description:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of flowers by their description
+      parameters:
+      - description: Flower Description
+        in: query
+        name: description
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Flower'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search flowers by description
+      tags:
+      - flowers
   /auth/sign-in:
     post:
       consumes:

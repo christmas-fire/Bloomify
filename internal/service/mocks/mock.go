@@ -146,6 +146,34 @@ func (mr *MockUserMockRecorder) GetById(userId interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockUser)(nil).GetById), userId)
 }
 
+// UpdatePassword mocks base method.
+func (m *MockUser) UpdatePassword(userId int, input models.UpdatePasswordInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePassword", userId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePassword indicates an expected call of UpdatePassword.
+func (mr *MockUserMockRecorder) UpdatePassword(userId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockUser)(nil).UpdatePassword), userId, input)
+}
+
+// UpdateUsername mocks base method.
+func (m *MockUser) UpdateUsername(userId int, input models.UpdateUsernameInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUsername", userId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUsername indicates an expected call of UpdateUsername.
+func (mr *MockUserMockRecorder) UpdateUsername(userId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUsername", reflect.TypeOf((*MockUser)(nil).UpdateUsername), userId, input)
+}
+
 // MockFlower is a mock of Flower interface.
 type MockFlower struct {
 	ctrl     *gomock.Controller
@@ -226,4 +254,120 @@ func (m *MockFlower) GetById(flowerId int) (models.Flower, error) {
 func (mr *MockFlowerMockRecorder) GetById(flowerId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockFlower)(nil).GetById), flowerId)
+}
+
+// GetFlowersByDescription mocks base method.
+func (m *MockFlower) GetFlowersByDescription(description string) ([]models.Flower, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFlowersByDescription", description)
+	ret0, _ := ret[0].([]models.Flower)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFlowersByDescription indicates an expected call of GetFlowersByDescription.
+func (mr *MockFlowerMockRecorder) GetFlowersByDescription(description interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFlowersByDescription", reflect.TypeOf((*MockFlower)(nil).GetFlowersByDescription), description)
+}
+
+// GetFlowersByName mocks base method.
+func (m *MockFlower) GetFlowersByName(name string) ([]models.Flower, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFlowersByName", name)
+	ret0, _ := ret[0].([]models.Flower)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFlowersByName indicates an expected call of GetFlowersByName.
+func (mr *MockFlowerMockRecorder) GetFlowersByName(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFlowersByName", reflect.TypeOf((*MockFlower)(nil).GetFlowersByName), name)
+}
+
+// GetFlowersByPrice mocks base method.
+func (m *MockFlower) GetFlowersByPrice(price string) ([]models.Flower, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFlowersByPrice", price)
+	ret0, _ := ret[0].([]models.Flower)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFlowersByPrice indicates an expected call of GetFlowersByPrice.
+func (mr *MockFlowerMockRecorder) GetFlowersByPrice(price interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFlowersByPrice", reflect.TypeOf((*MockFlower)(nil).GetFlowersByPrice), price)
+}
+
+// GetFlowersByStock mocks base method.
+func (m *MockFlower) GetFlowersByStock(stock string) ([]models.Flower, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFlowersByStock", stock)
+	ret0, _ := ret[0].([]models.Flower)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFlowersByStock indicates an expected call of GetFlowersByStock.
+func (mr *MockFlowerMockRecorder) GetFlowersByStock(stock interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFlowersByStock", reflect.TypeOf((*MockFlower)(nil).GetFlowersByStock), stock)
+}
+
+// UpdateDescription mocks base method.
+func (m *MockFlower) UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDescription", flowerId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateDescription indicates an expected call of UpdateDescription.
+func (mr *MockFlowerMockRecorder) UpdateDescription(flowerId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDescription", reflect.TypeOf((*MockFlower)(nil).UpdateDescription), flowerId, input)
+}
+
+// UpdateName mocks base method.
+func (m *MockFlower) UpdateName(flowerId int, input models.UpdateNameInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateName", flowerId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateName indicates an expected call of UpdateName.
+func (mr *MockFlowerMockRecorder) UpdateName(flowerId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateName", reflect.TypeOf((*MockFlower)(nil).UpdateName), flowerId, input)
+}
+
+// UpdatePrice mocks base method.
+func (m *MockFlower) UpdatePrice(flowerId int, input models.UpdatePriceInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePrice", flowerId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePrice indicates an expected call of UpdatePrice.
+func (mr *MockFlowerMockRecorder) UpdatePrice(flowerId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePrice", reflect.TypeOf((*MockFlower)(nil).UpdatePrice), flowerId, input)
+}
+
+// UpdateStock mocks base method.
+func (m *MockFlower) UpdateStock(flowerId int, input models.UpdateStockInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateStock", flowerId, input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateStock indicates an expected call of UpdateStock.
+func (mr *MockFlowerMockRecorder) UpdateStock(flowerId, input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStock", reflect.TypeOf((*MockFlower)(nil).UpdateStock), flowerId, input)
 }

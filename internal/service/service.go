@@ -16,18 +16,24 @@ type Auth interface {
 type User interface {
 	GetAll() ([]models.User, error)
 	GetById(userId int) (models.User, error)
-	Delete(userId int) error
 	UpdateUsername(userId int, input models.UpdateUsernameInput) error
 	UpdatePassword(userId int, input models.UpdatePasswordInput) error
+	Delete(userId int) error
 }
 
 type Flower interface {
 	CreateFlower(flower models.Flower) (int, error)
 	GetAll() ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
-	Delete(flowerId int) error
 	GetFlowersByName(name string) ([]models.Flower, error)
-	// Update(flowerId int, input models.Flower) error
+	GetFlowersByDescription(description string) ([]models.Flower, error)
+	GetFlowersByPrice(price string) ([]models.Flower, error)
+	GetFlowersByStock(stock string) ([]models.Flower, error)
+	UpdateName(flowerId int, input models.UpdateNameInput) error
+	UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error
+	UpdatePrice(flowerId int, input models.UpdatePriceInput) error
+	UpdateStock(flowerId int, input models.UpdateStockInput) error
+	Delete(flowerId int) error
 }
 
 type Service struct {

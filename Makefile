@@ -29,4 +29,5 @@ fmt:
 test:
 	@echo "Testing code..."
 	@$(GO) install gotest.tools/gotestsum@latest
-	@gotestsum -- -v ./...
+	@gotestsum --format testname ./...
+	

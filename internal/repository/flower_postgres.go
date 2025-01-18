@@ -69,3 +69,74 @@ func (r *FlowerPostgres) GetFlowersByName(name string) ([]models.Flower, error) 
 
 	return flowers, err
 }
+
+func (r *FlowerPostgres) GetFlowersByDescription(description string) ([]models.Flower, error) {
+	var flowers []models.Flower
+	query := "SELECT id, name, description, price, stock FROM flowers WHERE description ILIKE '%' || $1 || '%'"
+
+	err := r.db.Select(&flowers, query, description)
+
+	if len(flowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return flowers, err
+}
+
+func (r *FlowerPostgres) GetFlowersByPrice(price float64) ([]models.Flower, error) {
+	var flowers []models.Flower
+	query := "SELECT id, name, description, price, stock FROM flowers WHERE price <= $1 ORDER BY price DESC"
+
+	err := r.db.Select(&flowers, query, price)
+
+	if len(flowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return flowers, err
+}
+
+func (r *FlowerPostgres) GetFlowersByStock(stock int64) ([]models.Flower, error) {
+	var flowers []models.Flower
+	query := "SELECT id, name, description, price, stock FROM flowers WHERE stock <= $1 ORDER BY stock DESC"
+
+	err := r.db.Select(&flowers, query, stock)
+
+	if len(flowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return flowers, err
+}
+
+func (r *FlowerPostgres) UpdateName(flowerId int, input models.UpdateNameInput) error {
+	query := "UPDATE flowers SET name=$1 WHERE id=$2"
+
+	_, err := r.db.Exec(query, input.NewName, flowerId)
+
+	return err
+}
+
+func (r *FlowerPostgres) UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error {
+	query := "UPDATE flowers SET description=$1 WHERE id=$2"
+
+	_, err := r.db.Exec(query, input.NewDescription, flowerId)
+
+	return err
+}
+
+func (r *FlowerPostgres) UpdatePrice(flowerId int, input models.UpdatePriceInput) error {
+	query := "UPDATE flowers SET price=$1 WHERE id=$2"
+
+	_, err := r.db.Exec(query, input.NewPrice, flowerId)
+
+	return err
+}
+
+func (r *FlowerPostgres) UpdateStock(flowerId int, input models.UpdateStockInput) error {
+	query := "UPDATE flowers SET stock=$1 WHERE id=$2"
+
+	_, err := r.db.Exec(query, input.NewStock, flowerId)
+
+	return err
+}

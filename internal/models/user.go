@@ -14,7 +14,7 @@ type UpdateUsernameInput struct {
 }
 
 type UpdatePasswordInput struct {
-	Username    string `json:"username" db:"username" binding:"required"`
+	Username    string `json:"username" binding:"required"`
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required"`
 }

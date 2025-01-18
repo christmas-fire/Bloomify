@@ -68,6 +68,90 @@ func (h *Handler) getUserById(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// UpdateUserUsername godoc
+// @Summary Update user's username
+// @Description Update the username of a specific user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param input body models.UpdateUsernameInput true "Update Username Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/users/{id}/username [patch]
+func (h *Handler) updateUserUsername(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateUsernameInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdateUsername(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+// UpdateUserPassword godoc
+// @Summary Update user's password
+// @Description Update the password of a specific user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Param input body models.UpdatePasswordInput true "Update Password Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/users/{id}/password [patch]
+func (h *Handler) updateUserPassword(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdatePasswordInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdatePassword(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
 // DeleteUser godoc
 // @Summary Delete a user by ID
 // @Description Delete a user by their ID
@@ -99,62 +183,4 @@ func (h *Handler) deleteUser(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
-}
-
-func (h *Handler) updateUserUsername(c *gin.Context) {
-	_, err := getUserId(c)
-	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-
-	var input models.UpdateUsernameInput
-	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.services.User.UpdateUsername(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
-}
-
-func (h *Handler) updateUserPassword(c *gin.Context) {
-	_, err := getUserId(c)
-	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-		return
-	}
-
-	var input models.UpdatePasswordInput
-	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err := h.services.User.UpdatePassword(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
 }

@@ -37,9 +37,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				users.GET("/", h.getAllUsers)
 				users.GET("/:id", h.getUserById)
-				users.DELETE("/:id", h.deleteUser)
 				users.PATCH("/:id/change-username", h.updateUserUsername)
 				users.PATCH("/:id/change-password", h.updateUserPassword)
+				users.DELETE("/:id", h.deleteUser)
 			}
 
 			flowers := v1.Group("/flowers")
@@ -47,10 +47,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				flowers.POST("/", h.createFlower)
 				flowers.GET("/", h.getAllFlowers)
 				flowers.GET("/:id", h.getFlowerById)
-				flowers.DELETE("/:id", h.deleteFlower)
 				flowers.GET("/name", h.getFlowersByName)
-				// flowers.GET("/price", h.getFlowersByPrice)
-				// flowers.GET("/stock", h.getFlowersByStock)
+				flowers.GET("/description", h.getFlowersByDescription)
+				flowers.GET("/price", h.getFlowersByPrice)
+				flowers.GET("/stock", h.getFlowersByStock)
+				flowers.PATCH("/:id/change-name", h.updateFlowerName)
+				flowers.PATCH("/:id/change-description", h.updateFlowerDescription)
+				flowers.PATCH("/:id/change-price", h.updateFlowerPrice)
+				flowers.PATCH("/:id/change-stock", h.updateFlowerStock)
+				flowers.DELETE("/:id", h.deleteFlower)
 
 			}
 		}

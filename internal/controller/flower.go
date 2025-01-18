@@ -104,6 +104,310 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// GetFlowersByName godoc
+// @Summary Search flowers by name
+// @Description Retrieve a list of flowers by their name
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param name query string true "Flower Name"
+// @Success 200 {array} models.Flower "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/flowers/search [get]
+func (h *Handler) getFlowersByName(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	name := c.Query("name")
+	if name == "" {
+		newErrorResponse(c, http.StatusBadRequest, "not found query param")
+		return
+	}
+
+	flowers, err := h.services.Flower.GetFlowersByName(name)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, flowers)
+}
+
+// GetFlowersByDescription godoc
+// @Summary Search flowers by description
+// @Description Retrieve a list of flowers by their description
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param description query string true "Flower Description"
+// @Success 200 {array} models.Flower "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/flowers/search/description [get]
+func (h *Handler) getFlowersByDescription(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	description := c.Query("description")
+	if description == "" {
+		newErrorResponse(c, http.StatusBadRequest, "not found query param")
+		return
+	}
+
+	flowers, err := h.services.Flower.GetFlowersByDescription(description)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, flowers)
+}
+
+// GetFlowersByPrice godoc
+// @Summary Search flowers by price
+// @Description Retrieve a list of flowers with prices less than or equal to the specified value
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param price query string true "Max Price"
+// @Success 200 {array} models.Flower "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/flowers/price [get]
+func (h *Handler) getFlowersByPrice(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	price := c.Query("price")
+	if price == "" {
+		newErrorResponse(c, http.StatusBadRequest, "not found query param")
+		return
+	}
+
+	flowers, err := h.services.Flower.GetFlowersByPrice(price)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, flowers)
+}
+
+// GetFlowersByStock godoc
+// @Summary Search flowers by stock
+// @Description Retrieve a list of flowers with stock levels less than or equal to the specified value
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param stock query string true "Max Stock"
+// @Success 200 {array} models.Flower "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/flowers/stock [get]
+func (h *Handler) getFlowersByStock(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	stock := c.Query("stock")
+	if stock == "" {
+		newErrorResponse(c, http.StatusBadRequest, "not found query param")
+		return
+	}
+
+	flowers, err := h.services.Flower.GetFlowersByStock(stock)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, flowers)
+}
+
+// UpdateFlowerName godoc
+// @Summary Update flower's name
+// @Description Update the name of a specific flower by its ID
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param id path int true "Flower ID"
+// @Param input body models.UpdateNameInput true "Update Flower Name Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/flowers/{id}/name [patch]
+func (h *Handler) updateFlowerName(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateNameInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateName(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+// UpdateFlowerDescription godoc
+// @Summary Update flower's description
+// @Description Update the description of a specific flower by its ID
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param id path int true "Flower ID"
+// @Param input body models.UpdateDescriptionInput true "Update Flower Description Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/flowers/{id}/description [patch]
+func (h *Handler) updateFlowerDescription(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateDescriptionInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateDescription(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+// UpdateFlowerPrice godoc
+// @Summary Update flower's price
+// @Description Update the price of a specific flower by its ID
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param id path int true "Flower ID"
+// @Param input body models.UpdatePriceInput true "Update Flower Price Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/flowers/{id}/price [patch]
+func (h *Handler) updateFlowerPrice(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdatePriceInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdatePrice(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+// UpdateFlowerStock godoc
+// @Summary Update flower's stock
+// @Description Update the stock level of a specific flower by its ID
+// @Tags flowers
+// @Accept json
+// @Produce json
+// @Param id path int true "Flower ID"
+// @Param input body models.UpdateStockInput true "Update Flower Stock Input"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Router /api/v1/flowers/{id}/stock [patch]
+func (h *Handler) updateFlowerStock(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateStockInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateStock(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
 // DeleteFlower godoc
 // @Summary Delete a flower by ID
 // @Description Delete a flower by its ID
@@ -136,112 +440,3 @@ func (h *Handler) deleteFlower(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
-
-func (h *Handler) getFlowersByName(c *gin.Context) {
-	_, err := getUserId(c)
-	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	name := c.Query("name")
-	if name == "" {
-		newErrorResponse(c, http.StatusBadRequest, "not found query parameter ")
-		return
-	}
-
-	flowers, err := h.services.Flower.GetFlowersByName(name)
-	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, flowers)
-}
-
-// // Получение цветов по названию
-// func (h *FlowerHandler) GetFlowersByName() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method != http.MethodGet {
-// 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-// 			return
-// 		}
-
-// 		name := r.URL.Query().Get("name")
-// 		if name == "" {
-// 			http.Error(w, "name parameter is required", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		flowers, err := h.repo.GetFlowersByName(models.Flower{Name: name})
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		w.Header().Set("Content-Type", "application/json")
-// 		json.NewEncoder(w).Encode(flowers)
-// 	}
-// }
-
-// // Получение цветов по цене
-// func (h *FlowerHandler) GetFlowersByPrice() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method != http.MethodGet {
-// 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-// 			return
-// 		}
-
-// 		priceStr := r.URL.Query().Get("price")
-// 		if priceStr == "" {
-// 			http.Error(w, "price parameter is required", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		price, err := strconv.ParseFloat(priceStr, 64)
-// 		if err != nil {
-// 			http.Error(w, "invalid price value", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		flowers, err := h.repo.GetFlowersByPrice(models.Flower{Price: price})
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		w.Header().Set("Content-Type", "application/json")
-// 		json.NewEncoder(w).Encode(flowers)
-// 	}
-// }
-
-// // Получение цветов по количеству в наличии
-// func (h *FlowerHandler) GetFlowersByStock() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method != http.MethodGet {
-// 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-// 			return
-// 		}
-
-// 		stockStr := r.URL.Query().Get("stock")
-// 		if stockStr == "" {
-// 			http.Error(w, "stock parameter is required", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		stock, err := strconv.Atoi(stockStr)
-// 		if err != nil {
-// 			http.Error(w, "invalid stock value", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		flowers, err := h.repo.GetFlowersByStock(models.Flower{Stock: stock})
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		w.Header().Set("Content-Type", "application/json")
-// 		json.NewEncoder(w).Encode(flowers)
-// 	}
-// }
