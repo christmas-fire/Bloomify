@@ -38,6 +38,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				users.GET("/", h.getAllUsers)
 				users.GET("/:id", h.getUserById)
 				users.DELETE("/:id", h.deleteUser)
+				users.PATCH("/:id/change-username", h.updateUserUsername)
+				users.PATCH("/:id/change-password", h.updateUserPassword)
 			}
 
 			flowers := v1.Group("/flowers")

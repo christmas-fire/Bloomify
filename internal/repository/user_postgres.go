@@ -38,3 +38,19 @@ func (r *UserPostgres) Delete(userId int) error {
 
 	return err
 }
+
+func (r *UserPostgres) UpdateUsername(userId int, input models.UpdateUsernameInput) error {
+	query := "UPDATE users SET username=$1 WHERE username=$2 AND id=$3"
+
+	_, err := r.db.Exec(query, input.NewUsername, input.OldUsername, userId)
+
+	return err
+}
+
+func (r *UserPostgres) UpdatePassword(userId int, input models.UpdatePasswordInput) error {
+	query := "UPDATE users SET password=$1 WHERE username=$2 AND password=$3"
+
+	_, err := r.db.Exec(query, input.NewPassword, input.Username, input.OldPassword)
+
+	return err
+}
