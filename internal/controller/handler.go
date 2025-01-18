@@ -48,6 +48,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				flowers.GET("/", h.getAllFlowers)
 				flowers.GET("/:id", h.getFlowerById)
 				flowers.DELETE("/:id", h.deleteFlower)
+				flowers.GET("/name", h.getFlowersByName)
+				// flowers.GET("/price", h.getFlowersByPrice)
+				// flowers.GET("/stock", h.getFlowersByStock)
+
 			}
 		}
 	}

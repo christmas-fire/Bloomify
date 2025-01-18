@@ -23,6 +23,7 @@ type Flower interface {
 	GetAll() ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
 	Delete(flowerId int) error
+	GetFlowersByName(name string) ([]models.Flower, error)
 	// GetAll() ([]models.Flower, error)                  // Получение всех цветов
 	// GetFlowerByID(flowerId int) (models.Flower, error) // Получение цветка по ID
 	// DeleteFlowerByID(flowerId int) error               // Удаление цветка по ID

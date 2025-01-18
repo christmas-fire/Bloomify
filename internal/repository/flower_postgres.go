@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -31,6 +33,10 @@ func (r *FlowerPostgres) GetAll() ([]models.Flower, error) {
 
 	err := r.db.Select(&flowers, query)
 
+	if len(flowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
 	return flowers, err
 }
 
@@ -49,4 +55,17 @@ func (r *FlowerPostgres) Delete(flowerId int) error {
 	_, err := r.db.Exec(query, flowerId)
 
 	return err
+}
+
+func (r *FlowerPostgres) GetFlowersByName(name string) ([]models.Flower, error) {
+	var flowers []models.Flower
+	query := "SELECT id, name, description, price, stock FROM flowers WHERE name=$1"
+
+	err := r.db.Select(&flowers, query, name)
+
+	if len(flowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return flowers, err
 }

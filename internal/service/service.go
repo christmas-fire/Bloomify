@@ -24,6 +24,7 @@ type Flower interface {
 	GetAll() ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
 	Delete(flowerId int) error
+	GetFlowersByName(name string) ([]models.Flower, error)
 	// Update(flowerId int, input models.Flower) error
 }
 

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -18,6 +20,10 @@ func (r *UserPostgres) GetAll() ([]models.User, error) {
 	query := "SELECT id, username, email, password FROM users"
 
 	err := r.db.Select(&users, query)
+
+	if len(users) == 0 {
+		return nil, sql.ErrNoRows
+	}
 
 	return users, err
 }
