@@ -10,6 +10,7 @@ run:
 	@echo "Generating documentation with swag..."
 	@swag init -g cmd/main.go
 	@echo "Documentation generated."
+	@echo "You can see it on http://localhost:8080/swagger/index.html#/"
 	@echo "Running Bloomify..."
 	@docker-compose up --build
 
