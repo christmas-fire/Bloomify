@@ -58,6 +58,14 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				flowers.DELETE("/:id", h.deleteFlower)
 
 			}
+
+			orders := v1.Group("/orders")
+			{
+				orders.POST("/", h.createOrder)
+				orders.GET("/", h.getAllOrders)
+				orders.GET("/:id", h.getOrderById)
+				orders.GET("/user_id", h.getOrdersByUserId)
+			}
 		}
 	}
 

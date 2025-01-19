@@ -36,10 +36,18 @@ type Flower interface {
 	Delete(flowerId int) error
 }
 
+type Order interface {
+	CreateOrder(userId int, order_flowers models.OrderFlowers) (int, error)
+	GetAll() ([]models.Order, error)
+	GetById(orderId int) (models.Order, error)
+	GetOrdersByUserId(userId string) ([]models.Order, error)
+}
+
 type Service struct {
 	Auth
 	User
 	Flower
+	Order
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -47,5 +55,6 @@ func NewService(repos *repository.Repository) *Service {
 		Auth:   NewAuthService(repos.Auth),
 		User:   NewUserService(repos.User),
 		Flower: NewFlowerService(repos.Flower),
+		Order:  NewOrderService(repos.Order),
 	}
 }

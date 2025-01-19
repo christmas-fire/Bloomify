@@ -33,10 +33,18 @@ type Flower interface {
 	Delete(flowerId int) error
 }
 
+type Order interface {
+	CreateOrder(userId int, order_flowers models.OrderFlowers) (int, error)
+	GetAll() ([]models.Order, error)
+	GetById(orderId int) (models.Order, error)
+	GetOrdersByUserId(userId int64) ([]models.Order, error)
+}
+
 type Repository struct {
 	Auth
 	User
 	Flower
+	Order
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -44,5 +52,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Auth:   NewAuthPostgres(db),
 		User:   NewUserPostgres(db),
 		Flower: NewFlowerPostgres(db),
+		Order:  NewOrderPostgres(db),
 	}
 }
