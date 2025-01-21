@@ -95,3 +95,85 @@ func (r *OrderPostgres) GetOrdersByUserId(userId int64) ([]models.Order, error) 
 
 	return orders, err
 }
+
+func (r *OrderPostgres) GetAllOrderFlowers() ([]models.OrderFlowers, error) {
+	var orderFlowers []models.OrderFlowers
+	query := "SELECT order_id, flower_id, quantity FROM order_flowers"
+
+	err := r.db.Select(&orderFlowers, query)
+
+	if len(orderFlowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return orderFlowers, err
+}
+
+func (r *OrderPostgres) GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error) {
+	var orderFlowers []models.OrderFlowers
+	query := "SELECT order_id, flower_id, quantity FROM order_flowers WHERE order_id=$1"
+
+	err := r.db.Select(&orderFlowers, query, orderFlowersId)
+
+	if len(orderFlowers) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return orderFlowers, err
+}
+
+func (r *OrderPostgres) UpdateOrder(orderId int, input models.UpdateOrderInput) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Проверяем наличие цветка и получаем его цену
+	var price float64
+	query := "SELECT price FROM flowers WHERE id = $1"
+	row := tx.QueryRow(query, input.NewFlowerId)
+	err = row.Scan(&price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("flower with id %d not found", input.NewFlowerId)
+		}
+		return err
+	}
+
+	// Устанавливаем новую общую стоимость заказа
+	newTotalPrice := price * float64(input.NewQuantity)
+
+	// Обновляем заказ
+	query = `
+        UPDATE orders 
+        SET total_price = $1, order_date = NOW()
+        WHERE id = $2
+    `
+	_, err = tx.Exec(query, newTotalPrice, orderId)
+	if err != nil {
+		return err
+	}
+
+	// Удаляем все старые записи о цветах в этом заказе
+	query = "DELETE FROM order_flowers WHERE order_id = $1"
+	_, err = tx.Exec(query, orderId)
+	if err != nil {
+		return err
+	}
+
+	// Добавляем новую запись о цветке в заказ
+	query = "INSERT INTO order_flowers (order_id, flower_id, quantity) VALUES ($1, $2, $3)"
+	_, err = tx.Exec(query, orderId, input.NewFlowerId, input.NewQuantity)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

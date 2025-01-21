@@ -38,6 +38,9 @@ type Order interface {
 	GetAll() ([]models.Order, error)
 	GetById(orderId int) (models.Order, error)
 	GetOrdersByUserId(userId int64) ([]models.Order, error)
+	GetAllOrderFlowers() ([]models.OrderFlowers, error)
+	GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error)
+	UpdateOrder(orderId int, input models.UpdateOrderInput) error
 }
 
 type Repository struct {

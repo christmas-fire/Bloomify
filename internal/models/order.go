@@ -12,3 +12,16 @@ type OrderFlowers struct {
 	FlowerId int `json:"flower_id" db:"flower_id" binding:"required"`
 	Quantity int `json:"quantity" db:"quantity" binding:"required"`
 }
+
+type UpdateOrderInput struct {
+	NewFlowerId int `json:"new_flower_id" binding:"required"`
+	NewQuantity int `json:"new_quantity" binding:"required"`
+}
+
+type UpdateOrderFlowerIdInput struct {
+	NewFlowerId int `json:"new_flower_id" binding:"required"`
+}
+
+type UpdateOrderQuantityInput struct {
+	NewQuantity int `json:"new_quantity" binding:"required"`
+}

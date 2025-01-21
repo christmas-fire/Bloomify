@@ -41,6 +41,10 @@ type Order interface {
 	GetAll() ([]models.Order, error)
 	GetById(orderId int) (models.Order, error)
 	GetOrdersByUserId(userId string) ([]models.Order, error)
+	GetAllOrderFlowers() ([]models.OrderFlowers, error)
+	GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error)
+	UpdateOrder(orderId int, input models.UpdateOrderInput) error
+	UpdateOrderFlowerId(orderId int, input models.UpdateOrderInput) error
 }
 
 type Service struct {

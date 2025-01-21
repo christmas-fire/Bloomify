@@ -45,7 +45,7 @@ func (h *Handler) getAllOrders(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, orders)
+	c.JSON(http.StatusOK, orders)
 }
 
 func (h *Handler) getOrderById(c *gin.Context) {
@@ -67,7 +67,7 @@ func (h *Handler) getOrderById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, order)
+	c.JSON(http.StatusOK, order)
 }
 
 func (h *Handler) getOrdersByUserId(c *gin.Context) {
@@ -89,5 +89,101 @@ func (h *Handler) getOrdersByUserId(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, orders)
+	c.JSON(http.StatusOK, orders)
+}
+
+func (h *Handler) getAllOrderFlowers(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	orderFlowers, err := h.services.Order.GetAllOrderFlowers()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, orderFlowers)
+}
+
+func (h *Handler) getOrderFlowersByOrderId(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	orderFlowers, err := h.services.Order.GetOrderFlowersByOrderId(id)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, orderFlowers)
+}
+
+func (h *Handler) updateOrder(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateOrderInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Order.UpdateOrder(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
+}
+
+func (h *Handler) updateOrderFlowerId(c *gin.Context) {
+	_, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	var input models.UpdateOrderFlowerIdInput
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Order.UpdateOrderFlowerId(id, input); err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
 }

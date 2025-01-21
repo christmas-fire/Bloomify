@@ -35,3 +35,19 @@ func (s *OrderService) GetOrdersByUserId(userId string) ([]models.Order, error) 
 
 	return s.repo.GetOrdersByUserId(intUserId)
 }
+
+func (s *OrderService) GetAllOrderFlowers() ([]models.OrderFlowers, error) {
+	return s.repo.GetAllOrderFlowers()
+}
+
+func (s *OrderService) GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error) {
+	return s.repo.GetOrderFlowersByOrderId(orderFlowersId)
+}
+
+func (s *OrderService) UpdateOrder(orderId int, input models.UpdateOrderInput) error {
+	return s.repo.UpdateOrder(orderId, input)
+}
+
+func (s *OrderService) UpdateOrderFlowerId(orderId int, input models.UpdateOrderInput) error {
+
+}
