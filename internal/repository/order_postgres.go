@@ -40,10 +40,8 @@ func (r *OrderPostgres) CreateOrder(userId int, orderFlower models.OrderFlowers)
 		return 0, err
 	}
 
-	// Вычисляем общую стоимость заказа
 	totalPrice := price * float64(orderFlower.Quantity)
 
-	// Создаем новый заказ
 	var orderId int
 	query = "INSERT INTO orders (user_id, total_price, order_date) VALUES ($1, $2, NOW()) RETURNING id"
 	err = tx.QueryRow(query, userId, totalPrice).Scan(&orderId)
@@ -51,7 +49,6 @@ func (r *OrderPostgres) CreateOrder(userId int, orderFlower models.OrderFlowers)
 		return 0, err
 	}
 
-	// Добавляем запись о цветке в заказ
 	query = "INSERT INTO order_flowers (order_id, flower_id, quantity) VALUES ($1, $2, $3)"
 	_, err = tx.Exec(query, orderId, orderFlower.FlowerId, orderFlower.Quantity)
 	if err != nil {
@@ -135,7 +132,6 @@ func (r *OrderPostgres) UpdateOrder(orderId int, input models.UpdateOrderInput) 
 		}
 	}()
 
-	// Проверяем наличие цветка и получаем его цену
 	var price float64
 	query := "SELECT price FROM flowers WHERE id = $1"
 	row := tx.QueryRow(query, input.NewFlowerId)
@@ -147,10 +143,8 @@ func (r *OrderPostgres) UpdateOrder(orderId int, input models.UpdateOrderInput) 
 		return err
 	}
 
-	// Устанавливаем новую общую стоимость заказа
 	newTotalPrice := price * float64(input.NewQuantity)
 
-	// Обновляем заказ
 	query = `
         UPDATE orders 
         SET total_price = $1, order_date = NOW()
@@ -161,14 +155,12 @@ func (r *OrderPostgres) UpdateOrder(orderId int, input models.UpdateOrderInput) 
 		return err
 	}
 
-	// Удаляем все старые записи о цветах в этом заказе
 	query = "DELETE FROM order_flowers WHERE order_id = $1"
 	_, err = tx.Exec(query, orderId)
 	if err != nil {
 		return err
 	}
 
-	// Добавляем новую запись о цветке в заказ
 	query = "INSERT INTO order_flowers (order_id, flower_id, quantity) VALUES ($1, $2, $3)"
 	_, err = tx.Exec(query, orderId, input.NewFlowerId, input.NewQuantity)
 	if err != nil {
@@ -191,7 +183,6 @@ func (r *OrderPostgres) UpdateOrderFlowerId(orderId int, input models.UpdateOrde
 		}
 	}()
 
-	// Проверяем наличие цветка и получаем его цену
 	var newPrice float64
 	query := "SELECT price FROM flowers WHERE id = $1"
 	row := tx.QueryRow(query, input.NewFlowerId)
@@ -203,7 +194,6 @@ func (r *OrderPostgres) UpdateOrderFlowerId(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Получаем текущее количество цветков в заказе
 	var quantity int
 	query = "SELECT quantity FROM order_flowers WHERE order_id = $1"
 	err = tx.QueryRow(query, orderId).Scan(&quantity)
@@ -214,10 +204,8 @@ func (r *OrderPostgres) UpdateOrderFlowerId(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Устанавливаем новую общую стоимость заказа
 	newTotalPrice := newPrice * float64(quantity)
 
-	// Обновляем заказ
 	query = `
         UPDATE orders 
         SET total_price = $1, order_date = NOW()
@@ -228,7 +216,6 @@ func (r *OrderPostgres) UpdateOrderFlowerId(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Обновляем запись о цветке в заказе
 	query = `
         UPDATE order_flowers 
         SET flower_id = $1
@@ -255,7 +242,6 @@ func (r *OrderPostgres) UpdateOrderQuantity(orderId int, input models.UpdateOrde
 		}
 	}()
 
-	// Получаем текущий идентификатор цветка в заказе
 	var flowerId int
 	query := "SELECT flower_id FROM order_flowers WHERE order_id = $1"
 	err = tx.QueryRow(query, orderId).Scan(&flowerId)
@@ -266,7 +252,6 @@ func (r *OrderPostgres) UpdateOrderQuantity(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Проверяем наличие цветка и получаем его цену
 	var price float64
 	query = "SELECT price FROM flowers WHERE id = $1"
 	row := tx.QueryRow(query, flowerId)
@@ -278,10 +263,8 @@ func (r *OrderPostgres) UpdateOrderQuantity(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Устанавливаем новую общую стоимость заказа
 	newTotalPrice := price * float64(input.NewQuantity)
 
-	// Обновляем заказ
 	query = `
         UPDATE orders 
         SET total_price = $1, order_date = NOW()
@@ -292,7 +275,6 @@ func (r *OrderPostgres) UpdateOrderQuantity(orderId int, input models.UpdateOrde
 		return err
 	}
 
-	// Обновляем запись о цветке в заказе
 	query = `
         UPDATE order_flowers 
         SET quantity = $1
@@ -319,7 +301,6 @@ func (r *OrderPostgres) Delete(orderId int) error {
 		}
 	}()
 
-	// Удаляем все записи о цветах в данном заказе
 	query := "DELETE FROM order_flowers WHERE order_id = $1"
 	result, err := tx.Exec(query, orderId)
 	if err != nil {
@@ -334,7 +315,6 @@ func (r *OrderPostgres) Delete(orderId int) error {
 		return fmt.Errorf("no flowers found in order with id %d", orderId)
 	}
 
-	// Удаляем сам заказ
 	query = "DELETE FROM orders WHERE id = $1"
 	result, err = tx.Exec(query, orderId)
 	if err != nil {
