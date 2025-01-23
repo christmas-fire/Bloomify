@@ -19,7 +19,7 @@ import (
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers [post]
+// @Router /api/v1/flowers [post]
 func (h *Handler) createFlower(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -53,7 +53,7 @@ func (h *Handler) createFlower(c *gin.Context) {
 // @Success 200 {array} models.Flower "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers [get]
+// @Router /api/v1/flowers [get]
 func (h *Handler) getAllFlowers(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -81,7 +81,7 @@ func (h *Handler) getAllFlowers(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers/{id} [get]
+// @Router /api/v1/flowers/{id} [get]
 func (h *Handler) getFlowerById(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -115,7 +115,7 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers/search [get]
+// @Router /api/v1/flowers/name [get]
 func (h *Handler) getFlowersByName(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -149,7 +149,7 @@ func (h *Handler) getFlowersByName(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/v1/flowers/search/description [get]
+// @Router /api/v1/flowers/description [get]
 func (h *Handler) getFlowersByDescription(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -183,7 +183,7 @@ func (h *Handler) getFlowersByDescription(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers/price [get]
+// @Router /api/v1/flowers/price [get]
 func (h *Handler) getFlowersByPrice(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {
@@ -217,7 +217,7 @@ func (h *Handler) getFlowersByPrice(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
-// @Router /api/flowers/stock [get]
+// @Router /api/v1/flowers/stock [get]
 func (h *Handler) getFlowersByStock(c *gin.Context) {
 	_, err := getUserId(c)
 	if err != nil {

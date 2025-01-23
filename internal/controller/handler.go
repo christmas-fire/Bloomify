@@ -4,8 +4,8 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
 
-	swaggerFiles "github.com/swaggo/files"     // swagger embed files
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/christmas-fire/Bloomify/docs"
 )
@@ -37,8 +37,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				users.GET("/", h.getAllUsers)
 				users.GET("/:id", h.getUserById)
-				users.PATCH("/:id/change-username", h.updateUserUsername)
-				users.PATCH("/:id/change-password", h.updateUserPassword)
+				users.PATCH("/:id/username", h.updateUserUsername)
+				users.PATCH("/:id/password", h.updateUserPassword)
 				users.DELETE("/:id", h.deleteUser)
 			}
 
@@ -51,10 +51,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				flowers.GET("/description", h.getFlowersByDescription)
 				flowers.GET("/price", h.getFlowersByPrice)
 				flowers.GET("/stock", h.getFlowersByStock)
-				flowers.PATCH("/:id/change-name", h.updateFlowerName)
-				flowers.PATCH("/:id/change-description", h.updateFlowerDescription)
-				flowers.PATCH("/:id/change-price", h.updateFlowerPrice)
-				flowers.PATCH("/:id/change-stock", h.updateFlowerStock)
+				flowers.PATCH("/:id/name", h.updateFlowerName)
+				flowers.PATCH("/:id/description", h.updateFlowerDescription)
+				flowers.PATCH("/:id/price", h.updateFlowerPrice)
+				flowers.PATCH("/:id/stock", h.updateFlowerStock)
 				flowers.DELETE("/:id", h.deleteFlower)
 
 			}
@@ -65,10 +65,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				orders.GET("/", h.getAllOrders)
 				orders.GET("/:id", h.getOrderById)
 				orders.GET("/user_id", h.getOrdersByUserId)
-				orders.PUT("/:id/change", h.updateOrder)
-				orders.PATCH("/:id/change-flower_id", h.updateOrderFlowerId)
-				// orders.PATCH("/:id/change-quantity", h.updateOrderQuantity)
-				// orders.DELETE("/:id", h.deleteFlower)
+				orders.PUT("/:id", h.updateOrder)
+				orders.PATCH("/:id/flower_id", h.updateOrderFlowerId)
+				orders.PATCH("/:id/quantity", h.updateOrderQuantity)
+				orders.DELETE("/:id", h.deleteOrder)
 
 			}
 

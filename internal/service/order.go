@@ -48,6 +48,14 @@ func (s *OrderService) UpdateOrder(orderId int, input models.UpdateOrderInput) e
 	return s.repo.UpdateOrder(orderId, input)
 }
 
-func (s *OrderService) UpdateOrderFlowerId(orderId int, input models.UpdateOrderInput) error {
+func (s *OrderService) UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error {
+	return s.repo.UpdateOrderFlowerId(orderId, input)
+}
 
+func (s *OrderService) UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error {
+	return s.repo.UpdateOrderQuantity(orderId, input)
+}
+
+func (s *OrderService) Delete(orderId int) error {
+	return s.repo.Delete(orderId)
 }

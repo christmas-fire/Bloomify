@@ -41,6 +41,9 @@ type Order interface {
 	GetAllOrderFlowers() ([]models.OrderFlowers, error)
 	GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error)
 	UpdateOrder(orderId int, input models.UpdateOrderInput) error
+	UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error
+	UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error
+	Delete(orderId int) error
 }
 
 type Repository struct {

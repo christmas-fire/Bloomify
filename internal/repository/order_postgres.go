@@ -177,3 +177,177 @@ func (r *OrderPostgres) UpdateOrder(orderId int, input models.UpdateOrderInput) 
 
 	return nil
 }
+
+func (r *OrderPostgres) UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Проверяем наличие цветка и получаем его цену
+	var newPrice float64
+	query := "SELECT price FROM flowers WHERE id = $1"
+	row := tx.QueryRow(query, input.NewFlowerId)
+	err = row.Scan(&newPrice)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("flower with id %d not found", input.NewFlowerId)
+		}
+		return err
+	}
+
+	// Получаем текущее количество цветков в заказе
+	var quantity int
+	query = "SELECT quantity FROM order_flowers WHERE order_id = $1"
+	err = tx.QueryRow(query, orderId).Scan(&quantity)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("no flower found in order with id %d", orderId)
+		}
+		return err
+	}
+
+	// Устанавливаем новую общую стоимость заказа
+	newTotalPrice := newPrice * float64(quantity)
+
+	// Обновляем заказ
+	query = `
+        UPDATE orders 
+        SET total_price = $1, order_date = NOW()
+        WHERE id = $2
+    `
+	_, err = tx.Exec(query, newTotalPrice, orderId)
+	if err != nil {
+		return err
+	}
+
+	// Обновляем запись о цветке в заказе
+	query = `
+        UPDATE order_flowers 
+        SET flower_id = $1
+        WHERE order_id = $2
+    `
+	_, err = tx.Exec(query, input.NewFlowerId, orderId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *OrderPostgres) UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Получаем текущий идентификатор цветка в заказе
+	var flowerId int
+	query := "SELECT flower_id FROM order_flowers WHERE order_id = $1"
+	err = tx.QueryRow(query, orderId).Scan(&flowerId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("no flower found in order with id %d", orderId)
+		}
+		return err
+	}
+
+	// Проверяем наличие цветка и получаем его цену
+	var price float64
+	query = "SELECT price FROM flowers WHERE id = $1"
+	row := tx.QueryRow(query, flowerId)
+	err = row.Scan(&price)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("flower with id %d not found", flowerId)
+		}
+		return err
+	}
+
+	// Устанавливаем новую общую стоимость заказа
+	newTotalPrice := price * float64(input.NewQuantity)
+
+	// Обновляем заказ
+	query = `
+        UPDATE orders 
+        SET total_price = $1, order_date = NOW()
+        WHERE id = $2
+    `
+	_, err = tx.Exec(query, newTotalPrice, orderId)
+	if err != nil {
+		return err
+	}
+
+	// Обновляем запись о цветке в заказе
+	query = `
+        UPDATE order_flowers 
+        SET quantity = $1
+        WHERE order_id = $2
+    `
+	_, err = tx.Exec(query, input.NewQuantity, orderId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *OrderPostgres) Delete(orderId int) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	// Удаляем все записи о цветах в данном заказе
+	query := "DELETE FROM order_flowers WHERE order_id = $1"
+	result, err := tx.Exec(query, orderId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("no flowers found in order with id %d", orderId)
+	}
+
+	// Удаляем сам заказ
+	query = "DELETE FROM orders WHERE id = $1"
+	result, err = tx.Exec(query, orderId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("order with id %d not found", orderId)
+	}
+
+	return nil
+}
