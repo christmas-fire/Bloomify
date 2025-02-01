@@ -44,13 +44,15 @@ go mod download
 Создайте файл `.env` в корне проекта и добавьте следующие переменные окружения:
 
 ```yaml
-DB_HOST=db
-DB_PORT=5432
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=bloomify
-DB_SSL_MODE=disable
-PORT=8080
+DATABASE_HOST=db
+DATABASE_PORT=5432
+DATABASE_USER=your_db_user
+DATABASE_PASSWORD=your_db_password
+DATABASE_NAME=bloomify
+
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_db_password
+POSTGRES_DB=bloomify
 ```
 
 ## Локальный запуск
