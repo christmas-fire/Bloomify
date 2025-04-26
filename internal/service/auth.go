@@ -1,7 +1,11 @@
 package service
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
+	"crypto/sha256"
+	"database/sql"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,12 +14,15 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
 )
 
 const (
-	salt       = "romanbarma2005"
-	signingKey = "sonyboy"
-	tokenTTL   = 12 * time.Hour
+	salt              = "romanbarma2005"
+	signingKey        = "sonyboy"
+	accessTokenTTL    = 15 * time.Minute
+	refreshTokenTTL   = 720 * time.Hour
+	refreshTokenBytes = 32
 )
 
 type customClaims struct {
@@ -24,10 +31,10 @@ type customClaims struct {
 }
 
 type AuthService struct {
-	repo repository.Auth
+	repo repository.Repository
 }
 
-func NewAuthService(repo repository.Auth) *AuthService {
+func NewAuthService(repo repository.Repository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
@@ -37,32 +44,88 @@ func (s *AuthService) CreateUser(user models.User) (int, error) {
 	}
 	user.Password = generatePasswordHash(user.Password)
 
-	return s.repo.CreateUser(user)
+	return s.repo.Auth.CreateUser(user)
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GetUser(username, generatePasswordHash(password))
-	if err != nil {
-		return "", err
-	}
+type Tokens struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
 
-	token := jwt.NewWithClaims(
+func (s *AuthService) generateTokens(userId int) (Tokens, error) {
+	var tokens Tokens
+	var err error
+
+	accesToken := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		customClaims{
 			StandardClaims: jwt.StandardClaims{
 				IssuedAt:  time.Now().Unix(),
-				ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+				ExpiresAt: time.Now().Add(accessTokenTTL).Unix(),
 			},
-			UserId: user.Id,
+			UserId: userId,
 		},
 	)
-
-	tokenString, err := token.SignedString([]byte(signingKey))
+	tokens.AccessToken, err = accesToken.SignedString([]byte(signingKey))
 	if err != nil {
-		return "", err
+		return Tokens{}, fmt.Errorf("failed to sign access token: %w", err)
 	}
 
-	return tokenString, nil
+	refreshTokenBytesArr := make([]byte, refreshTokenBytes)
+	_, err = rand.Read(refreshTokenBytesArr)
+	if err != nil {
+		return Tokens{}, fmt.Errorf("failed to generate refresh token bytes: %w", err)
+	}
+	tokens.RefreshToken = base64.URLEncoding.EncodeToString(refreshTokenBytesArr)
+
+	refreshTokenHash := sha256.Sum256([]byte(tokens.RefreshToken))
+
+	session := models.RefreshSession{
+		UserID:           userId,
+		RefreshTokenHash: fmt.Sprintf("%x", refreshTokenHash[:]),
+		ExpiresAt:        time.Now().Add(refreshTokenTTL),
+	}
+
+	if err := s.repo.Session.CreateSession(session); err != nil {
+		return Tokens{}, fmt.Errorf("failed to create refresh session: %w", err)
+	}
+
+	return tokens, nil
+}
+
+func (s *AuthService) GenerateToken(username, password string) (Tokens, error) {
+	user, err := s.repo.Auth.GetUser(username, generatePasswordHash(password))
+	if err != nil {
+		return Tokens{}, errors.New("invalid username or password")
+	}
+
+	return s.generateTokens(user.Id)
+}
+
+func (s *AuthService) RefreshToken(refreshToken string) (Tokens, error) {
+	refreshTokenHash := sha256.Sum256([]byte(refreshToken))
+	hashString := fmt.Sprintf("%x", refreshTokenHash[:])
+
+	session, err := s.repo.Session.GetSession(hashString)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return Tokens{}, errors.New("refresh session not found")
+		}
+		return Tokens{}, fmt.Errorf("failed to get session: %w", err)
+	}
+
+	if time.Now().After(session.ExpiresAt) {
+		if delErr := s.repo.Session.DeleteSession(hashString); delErr != nil {
+			logrus.Errorf("Failed to delete expired session: %v", delErr)
+		}
+		return Tokens{}, errors.New("refresh token expired")
+	}
+
+	if err := s.repo.Session.DeleteSession(hashString); err != nil {
+		return Tokens{}, fmt.Errorf("failed to delete old session: %w", err)
+	}
+
+	return s.generateTokens(session.UserID)
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
@@ -74,6 +137,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
+		logrus.Errorf("Error parsing token: %v", err)
 		return 0, err
 	}
 

@@ -31,3 +31,8 @@ test:
 	@$(GO) install gotest.tools/gotestsum@latest
 	@gotestsum --format testname ./...
 	
+# Цель для остановки приложения
+clean:
+	@echo "Stopping Bloomify..."
+	@docker-compose down
+

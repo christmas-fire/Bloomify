@@ -9,8 +9,9 @@ import (
 
 type Auth interface {
 	CreateUser(user models.User) (int, error)
-	GenerateToken(username, password string) (string, error)
+	GenerateToken(username, password string) (Tokens, error)
 	ParseToken(accessToken string) (int, error)
+	RefreshToken(refreshToken string) (Tokens, error)
 }
 
 type User interface {
@@ -57,8 +58,10 @@ type Service struct {
 }
 
 func NewService(repos *repository.Repository) *Service {
+	authService := NewAuthService(*repos)
+
 	return &Service{
-		Auth:   NewAuthService(repos.Auth),
+		Auth:   authService,
 		User:   NewUserService(repos.User),
 		Flower: NewFlowerService(repos.Flower),
 		Order:  NewOrderService(repos.Order),

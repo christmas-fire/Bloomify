@@ -19,6 +19,7 @@ import (
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers [post]
 func (h *Handler) createFlower(c *gin.Context) {
 	_, err := getUserId(c)
@@ -53,6 +54,7 @@ func (h *Handler) createFlower(c *gin.Context) {
 // @Success 200 {array} models.Flower "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers [get]
 func (h *Handler) getAllFlowers(c *gin.Context) {
 	_, err := getUserId(c)
@@ -81,6 +83,7 @@ func (h *Handler) getAllFlowers(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/{id} [get]
 func (h *Handler) getFlowerById(c *gin.Context) {
 	_, err := getUserId(c)
@@ -115,6 +118,7 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/name [get]
 func (h *Handler) getFlowersByName(c *gin.Context) {
 	_, err := getUserId(c)
@@ -149,6 +153,7 @@ func (h *Handler) getFlowersByName(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/description [get]
 func (h *Handler) getFlowersByDescription(c *gin.Context) {
 	_, err := getUserId(c)
@@ -183,6 +188,7 @@ func (h *Handler) getFlowersByDescription(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/price [get]
 func (h *Handler) getFlowersByPrice(c *gin.Context) {
 	_, err := getUserId(c)
@@ -217,6 +223,7 @@ func (h *Handler) getFlowersByPrice(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/stock [get]
 func (h *Handler) getFlowersByStock(c *gin.Context) {
 	_, err := getUserId(c)
@@ -252,6 +259,7 @@ func (h *Handler) getFlowersByStock(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/{id}/name [patch]
 func (h *Handler) updateFlowerName(c *gin.Context) {
 	_, err := getUserId(c)
@@ -294,6 +302,7 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/{id}/description [patch]
 func (h *Handler) updateFlowerDescription(c *gin.Context) {
 	_, err := getUserId(c)
@@ -336,6 +345,7 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/{id}/price [patch]
 func (h *Handler) updateFlowerPrice(c *gin.Context) {
 	_, err := getUserId(c)
@@ -378,6 +388,7 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/flowers/{id}/stock [patch]
 func (h *Handler) updateFlowerStock(c *gin.Context) {
 	_, err := getUserId(c)
@@ -419,6 +430,7 @@ func (h *Handler) updateFlowerStock(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/flowers/{id} [delete]
 func (h *Handler) deleteFlower(c *gin.Context) {
 	_, err := getUserId(c)

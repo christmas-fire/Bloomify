@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/flowers/{id}": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a flower by its ID",
                 "consumes": [
                     "application/json"
@@ -73,6 +78,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all flowers",
                 "consumes": [
                     "application/json"
@@ -115,6 +125,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add a new flower to the database",
                 "consumes": [
                     "application/json"
@@ -179,6 +194,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/description": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of flowers by their description",
                 "consumes": [
                     "application/json"
@@ -241,6 +261,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/name": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of flowers by their name",
                 "consumes": [
                     "application/json"
@@ -303,6 +328,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/price": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of flowers with prices less than or equal to the specified value",
                 "consumes": [
                     "application/json"
@@ -365,6 +395,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/stock": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of flowers with stock levels less than or equal to the specified value",
                 "consumes": [
                     "application/json"
@@ -427,6 +462,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a flower by its ID",
                 "consumes": [
                     "application/json"
@@ -486,6 +526,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/{id}/description": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the description of a specific flower by its ID",
                 "consumes": [
                     "application/json"
@@ -554,6 +599,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/{id}/name": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the name of a specific flower by its ID",
                 "consumes": [
                     "application/json"
@@ -622,6 +672,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/{id}/price": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the price of a specific flower by its ID",
                 "consumes": [
                     "application/json"
@@ -690,6 +745,11 @@ const docTemplate = `{
         },
         "/api/v1/flowers/{id}/stock": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the stock level of a specific flower by its ID",
                 "consumes": [
                     "application/json"
@@ -758,6 +818,11 @@ const docTemplate = `{
         },
         "/api/v1/order_flowers": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all flowers in orders for the authenticated user",
                 "consumes": [
                     "application/json"
@@ -802,6 +867,11 @@ const docTemplate = `{
         },
         "/api/v1/order_flowers/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all flowers in a specific order",
                 "consumes": [
                     "application/json"
@@ -864,6 +934,11 @@ const docTemplate = `{
         },
         "/api/v1/orders": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all orders for the authenticated user",
                 "consumes": [
                     "application/json"
@@ -906,6 +981,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new order for a user with a specific flower and quantity",
                 "consumes": [
                     "application/json"
@@ -970,6 +1050,11 @@ const docTemplate = `{
         },
         "/api/v1/orders/user_id": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all orders for a specific user",
                 "consumes": [
                     "application/json"
@@ -1032,6 +1117,11 @@ const docTemplate = `{
         },
         "/api/v1/orders/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get an order by its ID",
                 "consumes": [
                     "application/json"
@@ -1089,6 +1179,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the details of a specific order by its ID",
                 "consumes": [
                     "application/json"
@@ -1155,6 +1250,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a specific order by its ID",
                 "consumes": [
                     "application/json"
@@ -1211,6 +1311,11 @@ const docTemplate = `{
         },
         "/api/v1/orders/{id}/flower_id": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the flower ID of a specific order by its ID",
                 "consumes": [
                     "application/json"
@@ -1279,6 +1384,11 @@ const docTemplate = `{
         },
         "/api/v1/orders/{id}/quantity": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the quantity of a specific flower in an order by its ID",
                 "consumes": [
                     "application/json"
@@ -1347,6 +1457,11 @@ const docTemplate = `{
         },
         "/api/v1/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a list of all users",
                 "consumes": [
                     "application/json"
@@ -1391,6 +1506,11 @@ const docTemplate = `{
         },
         "/api/v1/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve a user by their ID",
                 "consumes": [
                     "application/json"
@@ -1448,6 +1568,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a user by their ID",
                 "consumes": [
                     "application/json"
@@ -1504,6 +1629,11 @@ const docTemplate = `{
         },
         "/api/v1/users/{id}/password": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the password of a specific user by their ID",
                 "consumes": [
                     "application/json"
@@ -1572,6 +1702,11 @@ const docTemplate = `{
         },
         "/api/v1/users/{id}/username": {
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update the username of a specific user by their ID",
                 "consumes": [
                     "application/json"
@@ -1638,9 +1773,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Generate a new pair of access and refresh tokens using a valid refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access and refresh tokens",
+                "parameters": [
+                    {
+                        "description": "Refresh token data",
+                        "name": "refreshInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.refreshInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Tokens"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/sign-in": {
             "post": {
-                "description": "Authenticate an existing user and return JWT token",
+                "description": "Authenticate an existing user and return access and refresh JWT tokens",
                 "consumes": [
                     "application/json"
                 ],
@@ -1663,31 +1850,28 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/service.Tokens"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/controller.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.errorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/controller.errorResponse"
                         }
                     }
                 }
@@ -1750,6 +1934,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "controller.errorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.refreshInput": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.signInInput": {
             "type": "object",
             "required": [
@@ -1978,10 +2181,22 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "service.Tokens": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
-        "ApiKeyAuth": {
+        "BearerAuth": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

@@ -45,10 +45,19 @@ const (
 			FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
 			FOREIGN KEY (flower_id) REFERENCES flowers (id) ON DELETE CASCADE
 		)`
+
+	SchemaRefreshSessions = `
+		CREATE TABLE refresh_sessions (
+			id SERIAL PRIMARY KEY,
+			user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			refresh_token_hash VARCHAR(255) NOT NULL UNIQUE,
+			expires_at TIMESTAMPTZ NOT NULL,
+			created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+	)`
 )
 
 // Схемы для инициализации базы данных
-var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
+var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers, SchemaRefreshSessions}
 
 // Конфигурация PostgreSQL
 type PostgreSQLConfig struct {

@@ -13,9 +13,10 @@ import (
 // @BasePath /
 // @schemes http
 
-// @securityDefinitions.apikey ApiKeyAuth
+// @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
 	// Инициализация приложения

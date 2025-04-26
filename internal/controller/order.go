@@ -19,6 +19,7 @@ import (
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders [post]
 func (h *Handler) createOrder(c *gin.Context) {
 	id, err := getUserId(c)
@@ -53,6 +54,7 @@ func (h *Handler) createOrder(c *gin.Context) {
 // @Success 200 {array} models.Order "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders [get]
 func (h *Handler) getAllOrders(c *gin.Context) {
 	_, err := getUserId(c)
@@ -81,6 +83,7 @@ func (h *Handler) getAllOrders(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/{id} [get]
 func (h *Handler) getOrderById(c *gin.Context) {
 	_, err := getUserId(c)
@@ -115,6 +118,7 @@ func (h *Handler) getOrderById(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/user_id [get]
 func (h *Handler) getOrdersByUserId(c *gin.Context) {
 	_, err := getUserId(c)
@@ -150,6 +154,7 @@ func (h *Handler) getOrdersByUserId(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/{id} [put]
 func (h *Handler) updateOrder(c *gin.Context) {
 	_, err := getUserId(c)
@@ -192,6 +197,7 @@ func (h *Handler) updateOrder(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/{id}/flower_id [patch]
 func (h *Handler) updateOrderFlowerId(c *gin.Context) {
 	_, err := getUserId(c)
@@ -234,6 +240,7 @@ func (h *Handler) updateOrderFlowerId(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/{id}/quantity [patch]
 func (h *Handler) updateOrderQuantity(c *gin.Context) {
 	_, err := getUserId(c)
@@ -275,6 +282,7 @@ func (h *Handler) updateOrderQuantity(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/orders/{id} [delete]
 func (h *Handler) deleteOrder(c *gin.Context) {
 	_, err := getUserId(c)
@@ -306,6 +314,7 @@ func (h *Handler) deleteOrder(c *gin.Context) {
 // @Success 200 {array} models.OrderFlowers "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/order_flowers [get]
 func (h *Handler) getAllOrderFlowers(c *gin.Context) {
 	_, err := getUserId(c)
@@ -334,6 +343,7 @@ func (h *Handler) getAllOrderFlowers(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/order_flowers/{id} [get]
 func (h *Handler) getOrderFlowersByOrderId(c *gin.Context) {
 	_, err := getUserId(c)

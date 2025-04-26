@@ -17,6 +17,7 @@ import (
 // @Success 200 {array} models.User "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/users [get]
 func (h *Handler) getAllUsers(c *gin.Context) {
 	_, err := getUserId(c)
@@ -45,6 +46,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) getUserById(c *gin.Context) {
 	_, err := getUserId(c)
@@ -80,6 +82,7 @@ func (h *Handler) getUserById(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/users/{id}/username [patch]
 func (h *Handler) updateUserUsername(c *gin.Context) {
 	_, err := getUserId(c)
@@ -122,6 +125,7 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/users/{id}/password [patch]
 func (h *Handler) updateUserPassword(c *gin.Context) {
 	_, err := getUserId(c)
@@ -163,6 +167,7 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) deleteUser(c *gin.Context) {
 	_, err := getUserId(c)

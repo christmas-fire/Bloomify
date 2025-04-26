@@ -46,18 +46,26 @@ type Order interface {
 	Delete(orderId int) error
 }
 
+type Session interface {
+	CreateSession(session models.RefreshSession) error
+	GetSession(refreshTokenHash string) (models.RefreshSession, error)
+	DeleteSession(refreshTokenHash string) error
+}
+
 type Repository struct {
 	Auth
 	User
 	Flower
 	Order
+	Session
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Auth:   NewAuthPostgres(db),
-		User:   NewUserPostgres(db),
-		Flower: NewFlowerPostgres(db),
-		Order:  NewOrderPostgres(db),
+		Auth:    NewAuthPostgres(db),
+		User:    NewUserPostgres(db),
+		Flower:  NewFlowerPostgres(db),
+		Order:   NewOrderPostgres(db),
+		Session: NewSessionPostgres(db),
 	}
 }

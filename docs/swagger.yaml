@@ -1,5 +1,17 @@
 basePath: /
 definitions:
+  controller.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  controller.refreshInput:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
   controller.signInInput:
     properties:
       password:
@@ -153,6 +165,13 @@ definitions:
     - password
     - username
     type: object
+  service.Tokens:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -194,6 +213,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete a flower by ID
       tags:
       - flowers
@@ -223,6 +244,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all flowers
       tags:
       - flowers
@@ -264,6 +287,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new flower
       tags:
       - flowers
@@ -303,6 +328,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get flower by ID
       tags:
       - flowers
@@ -348,6 +375,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update flower's description
       tags:
       - flowers
@@ -393,6 +422,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update flower's name
       tags:
       - flowers
@@ -438,6 +469,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update flower's price
       tags:
       - flowers
@@ -483,6 +516,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update flower's stock
       tags:
       - flowers
@@ -524,6 +559,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Search flowers by description
       tags:
       - flowers
@@ -565,6 +602,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Search flowers by name
       tags:
       - flowers
@@ -607,6 +646,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Search flowers by price
       tags:
       - flowers
@@ -649,6 +690,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Search flowers by stock
       tags:
       - flowers
@@ -678,6 +721,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all order flowers
       tags:
       - orders
@@ -719,6 +764,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get order flowers by order ID
       tags:
       - orders
@@ -748,6 +795,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all orders
       tags:
       - orders
@@ -789,6 +838,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new order with a flower
       tags:
       - orders
@@ -826,6 +877,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete an order
       tags:
       - orders
@@ -864,6 +917,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get order by ID
       tags:
       - orders
@@ -908,6 +963,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update an order
       tags:
       - orders
@@ -953,6 +1010,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update order's flower ID
       tags:
       - orders
@@ -998,6 +1057,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update order's flower quantity
       tags:
       - orders
@@ -1039,6 +1100,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get orders by user ID
       tags:
       - orders
@@ -1068,6 +1131,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get all users
       tags:
       - users
@@ -1105,6 +1170,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete a user by ID
       tags:
       - users
@@ -1143,6 +1210,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get user by ID
       tags:
       - users
@@ -1188,6 +1257,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update user's password
       tags:
       - users
@@ -1233,14 +1304,52 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update user's username
       tags:
       - users
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate a new pair of access and refresh tokens using a valid
+        refresh token
+      parameters:
+      - description: Refresh token data
+        in: body
+        name: refreshInput
+        required: true
+        schema:
+          $ref: '#/definitions/controller.refreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Tokens'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
+      summary: Refresh access and refresh tokens
+      tags:
+      - auth
   /auth/sign-in:
     post:
       consumes:
       - application/json
-      description: Authenticate an existing user and return JWT token
+      description: Authenticate an existing user and return access and refresh JWT
+        tokens
       parameters:
       - description: Sign in data
         in: body
@@ -1251,24 +1360,22 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/service.Tokens'
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/controller.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.errorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/controller.errorResponse'
       summary: Sign in an existing user
       tags:
       - auth
@@ -1311,7 +1418,8 @@ paths:
 schemes:
 - http
 securityDefinitions:
-  ApiKeyAuth:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
     in: header
     name: Authorization
     type: apiKey
