@@ -47,7 +47,7 @@ const (
 		)`
 
 	SchemaRefreshSessions = `
-		CREATE TABLE refresh_sessions (
+		CREATE TABLE IF NOT EXISTS refresh_sessions (
 			id SERIAL PRIMARY KEY,
 			user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 			refresh_token_hash VARCHAR(255) NOT NULL UNIQUE,
