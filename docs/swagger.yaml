@@ -46,6 +46,11 @@ definitions:
     type: object
   models.Order:
     properties:
+      flowers:
+        description: Добавляем поле для цветов
+        items:
+          $ref: '#/definitions/models.OrderFlowerInfo'
+        type: array
       id:
         type: integer
       order_date:
@@ -58,6 +63,13 @@ definitions:
     - order_date
     - total_price
     - user_id
+    type: object
+  models.OrderFlowerInfo:
+    properties:
+      id:
+        type: integer
+      quantity:
+        type: integer
     type: object
   models.OrderFlowers:
     properties:
@@ -142,6 +154,9 @@ definitions:
         type: string
       old_username:
         type: string
+    required:
+    - new_username
+    - old_username
     type: object
   models.User:
     properties:
@@ -770,7 +785,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all orders for the authenticated user
+      description: Get all orders (representing the cart) for the authenticated user
       produces:
       - application/json
       responses:
@@ -794,7 +809,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Get all orders
+      summary: Get current user's orders (cart)
       tags:
       - orders
     post:
@@ -1057,6 +1072,132 @@ paths:
       security:
       - BearerAuth: []
       summary: Update order's flower quantity
+      tags:
+      - orders
+  /api/v1/orders/flower/{flower_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a specific flower item from the active order of the authenticated
+        user
+      parameters:
+      - description: Flower ID to remove
+        in: path
+        name: flower_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove a flower from the current user's order (cart)
+      tags:
+      - orders
+  /api/v1/orders/flower/{flower_id}/decrement:
+    patch:
+      consumes:
+      - application/json
+      description: Decreases the quantity of a specific flower in the user's active
+        order by one. Removes if quantity becomes zero.
+      parameters:
+      - description: Flower ID to decrement
+        in: path
+        name: flower_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK (decremented)
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "204":
+          description: No Content (removed)
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Decrement flower quantity in the cart
+      tags:
+      - orders
+  /api/v1/orders/flower/{flower_id}/increment:
+    patch:
+      consumes:
+      - application/json
+      description: Increases the quantity of a specific flower in the user's active
+        order by one
+      parameters:
+      - description: Flower ID to increment
+        in: path
+        name: flower_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Increment flower quantity in the cart
       tags:
       - orders
   /api/v1/orders/user_id:

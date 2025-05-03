@@ -44,6 +44,10 @@ type Order interface {
 	UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error
 	UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error
 	Delete(orderId int) error
+	RemoveFlowerFromOrderByUser(userId int, flowerId int) error
+	IncrementFlowerQuantity(userId int, flowerId int) error
+	DecrementFlowerQuantity(userId int, flowerId int) error
+	DeleteActiveOrderByUserId(userId int) error
 }
 
 type Session interface {

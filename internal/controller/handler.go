@@ -85,6 +85,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				orders.PATCH("/:id/flower_id", h.updateOrderFlowerId)
 				orders.PATCH("/:id/quantity", h.updateOrderQuantity)
 				orders.DELETE("/:id", h.deleteOrder)
+				orders.DELETE("/flower/:flower_id/", h.removeFlowerFromOrder)
+				orders.PATCH("/flower/:flower_id/increment/", h.incrementFlowerQuantity)
+				orders.PATCH("/flower/:flower_id/decrement/", h.decrementFlowerQuantity)
+				orders.DELETE("/active", h.deleteActiveOrder)
 			}
 
 			order_flowers := v1.Group("/order_flowers")

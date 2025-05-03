@@ -48,6 +48,10 @@ type Order interface {
 	UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error
 	UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error
 	Delete(orderId int) error
+	RemoveFlowerFromOrder(userId int, flowerId int) error
+	IncrementFlowerQuantity(userId int, flowerId int) error
+	DecrementFlowerQuantity(userId int, flowerId int) error
+	DeleteActiveOrder(userId int) error
 }
 
 type Service struct {

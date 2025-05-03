@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -46,8 +47,8 @@ func (h *Handler) createOrder(c *gin.Context) {
 }
 
 // GetAllOrders godoc
-// @Summary Get all orders
-// @Description Get all orders for the authenticated user
+// @Summary Get current user's orders (cart)
+// @Description Get all orders (representing the cart) for the authenticated user
 // @Tags orders
 // @Accept json
 // @Produce json
@@ -57,16 +58,22 @@ func (h *Handler) createOrder(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders [get]
 func (h *Handler) getAllOrders(c *gin.Context) {
-	_, err := getUserId(c)
+	userId, err := getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		// getUserId уже отправил ошибку
 		return
 	}
 
-	orders, err := h.services.Order.GetAll()
+	// Используем GetOrdersByUserId вместо GetAll
+	orders, err := h.services.Order.GetOrdersByUserId(strconv.Itoa(userId))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	// Если заказов нет, возвращаем пустой массив (важно для фронтенда)
+	if orders == nil {
+		orders = []models.Order{}
 	}
 
 	c.JSON(http.StatusOK, orders)
@@ -365,4 +372,145 @@ func (h *Handler) getOrderFlowersByOrderId(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, orderFlowers)
+}
+
+// removeFlowerFromOrder godoc
+// @Summary Remove a flower from the current user's order (cart)
+// @Description Removes a specific flower item from the active order of the authenticated user
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Param flower_id path int true "Flower ID to remove"
+// @Success 204 "No Content"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/v1/orders/flower/{flower_id} [delete]
+func (h *Handler) removeFlowerFromOrder(c *gin.Context) {
+	// logrus.Infof("Handler: removeFlowerFromOrder started")
+	userId, err := getUserId(c)
+	if err != nil {
+		// logrus.Errorf("Handler: removeFlowerFromOrder - getUserId error: %v", err)
+		return
+	}
+
+	flowerIdStr := c.Param("flower_id")
+	flowerId, err := strconv.Atoi(flowerIdStr)
+	if err != nil {
+		// logrus.Errorf("Handler: removeFlowerFromOrder - invalid flower_id param: %s", flowerIdStr)
+		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		return
+	}
+
+	// logrus.Infof("Handler: removeFlowerFromOrder - calling service for userId: %d, flowerId: %d", userId, flowerId)
+	err = h.services.Order.RemoveFlowerFromOrder(userId, flowerId)
+	if err != nil {
+		// logrus.Errorf("Handler: removeFlowerFromOrder - service error: %v", err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// logrus.Infof("Handler: removeFlowerFromOrder finished successfully")
+	c.Status(http.StatusNoContent)
+}
+
+// incrementFlowerQuantity godoc
+// @Summary Increment flower quantity in the cart
+// @Description Increases the quantity of a specific flower in the user's active order by one
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Param flower_id path int true "Flower ID to increment"
+// @Success 200 {object} statusResponse "OK"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/v1/orders/flower/{flower_id}/increment [patch]
+func (h *Handler) incrementFlowerQuantity(c *gin.Context) {
+	// logrus.Infof("Handler: incrementFlowerQuantity started")
+	userId, err := getUserId(c)
+	if err != nil {
+		// logrus.Errorf("Handler: incrementFlowerQuantity - getUserId error: %v", err)
+		return
+	}
+
+	flowerIdStr := c.Param("flower_id")
+	flowerId, err := strconv.Atoi(flowerIdStr)
+	if err != nil {
+		// logrus.Errorf("Handler: incrementFlowerQuantity - invalid flower_id param: %s", flowerIdStr)
+		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		return
+	}
+
+	// logrus.Infof("Handler: incrementFlowerQuantity - calling service for userId: %d, flowerId: %d", userId, flowerId)
+	err = h.services.Order.IncrementFlowerQuantity(userId, flowerId)
+	if err != nil {
+		// logrus.Errorf("Handler: incrementFlowerQuantity - service error: %v", err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// logrus.Infof("Handler: incrementFlowerQuantity finished successfully")
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+}
+
+// decrementFlowerQuantity godoc
+// @Summary Decrement flower quantity in the cart
+// @Description Decreases the quantity of a specific flower in the user's active order by one. Removes if quantity becomes zero.
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Param flower_id path int true "Flower ID to decrement"
+// @Success 200 {object} statusResponse "OK (decremented)"
+// @Success 204 "No Content (removed)"
+// @Failure 400 {object} map[string]string "Bad Request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/v1/orders/flower/{flower_id}/decrement [patch]
+func (h *Handler) decrementFlowerQuantity(c *gin.Context) {
+	// logrus.Infof("Handler: decrementFlowerQuantity started")
+	userId, err := getUserId(c)
+	if err != nil {
+		// logrus.Errorf("Handler: decrementFlowerQuantity - getUserId error: %v", err)
+		return
+	}
+
+	flowerIdStr := c.Param("flower_id")
+	flowerId, err := strconv.Atoi(flowerIdStr)
+	if err != nil {
+		// logrus.Errorf("Handler: decrementFlowerQuantity - invalid flower_id param: %s", flowerIdStr)
+		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		return
+	}
+
+	// logrus.Infof("Handler: decrementFlowerQuantity - calling service for userId: %d, flowerId: %d", userId, flowerId)
+	err = h.services.Order.DecrementFlowerQuantity(userId, flowerId)
+	if err != nil {
+		// logrus.Errorf("Handler: decrementFlowerQuantity - service error: %v", err)
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// logrus.Infof("Handler: decrementFlowerQuantity finished successfully")
+	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
+}
+
+// deleteActiveOrder обрабатывает запрос на удаление активного заказа (корзины) пользователя
+func (h *Handler) deleteActiveOrder(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, "user id not found in context")
+		return
+	}
+
+	err = h.services.Order.DeleteActiveOrder(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("error deleting active order: %s", err.Error()))
+		return
+	}
+
+	c.Status(http.StatusNoContent) // Успешное удаление, нет тела ответа
 }

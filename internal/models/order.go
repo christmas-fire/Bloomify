@@ -1,10 +1,17 @@
 package models
 
+// OrderFlowerInfo представляет информацию о цветке в заказе (для JSON)
+type OrderFlowerInfo struct {
+	Id       int `json:"id"`
+	Quantity int `json:"quantity"`
+}
+
 type Order struct {
-	Id         int    `json:"id" db:"id"`
-	UserId     int    `json:"user_id" db:"user_id" binding:"required"`
-	OrderDate  string `json:"order_date" db:"order_date" binding:"required"`
-	TotalPrice string `json:"total_price" db:"total_price" binding:"required"`
+	Id         int               `json:"id" db:"id"`
+	UserId     int               `json:"user_id" db:"user_id" binding:"required"`
+	OrderDate  string            `json:"order_date" db:"order_date" binding:"required"`
+	TotalPrice string            `json:"total_price" db:"total_price" binding:"required"`
+	Flowers    []OrderFlowerInfo `json:"flowers,omitempty"` // Добавляем поле для цветов
 }
 
 type OrderFlowers struct {

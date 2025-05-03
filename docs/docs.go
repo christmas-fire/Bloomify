@@ -939,7 +939,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get all orders for the authenticated user",
+                "description": "Get all orders (representing the cart) for the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -949,7 +949,7 @@ const docTemplate = `{
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get all orders",
+                "summary": "Get current user's orders (cart)",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1016,6 +1016,198 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "integer"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/flower/{flower_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Removes a specific flower item from the active order of the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Remove a flower from the current user's order (cart)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Flower ID to remove",
+                        "name": "flower_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/flower/{flower_id}/decrement": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Decreases the quantity of a specific flower in the user's active order by one. Removes if quantity becomes zero.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Decrement flower quantity in the cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Flower ID to decrement",
+                        "name": "flower_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (decremented)",
+                        "schema": {
+                            "$ref": "#/definitions/controller.statusResponse"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content (removed)"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/flower/{flower_id}/increment": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Increases the quantity of a specific flower in the user's active order by one",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Increment flower quantity in the cart",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Flower ID to increment",
+                        "name": "flower_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.statusResponse"
                         }
                     },
                     "400": {
@@ -2052,6 +2244,13 @@ const docTemplate = `{
                 "user_id"
             ],
             "properties": {
+                "flowers": {
+                    "description": "Добавляем поле для цветов",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.OrderFlowerInfo"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2062,6 +2261,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.OrderFlowerInfo": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "quantity": {
                     "type": "integer"
                 }
             }
@@ -2186,6 +2396,10 @@ const docTemplate = `{
         },
         "models.UpdateUsernameInput": {
             "type": "object",
+            "required": [
+                "new_username",
+                "old_username"
+            ],
             "properties": {
                 "new_username": {
                     "type": "string"

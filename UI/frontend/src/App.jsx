@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import RegistrationForm from './RegistrationForm';
 import LoginForm from './LoginForm';
 import MainScreen from './MainScreen';
-import { getRefreshToken, setAccessToken, apiFetch } from './api';
+import { getRefreshToken, setAccessToken, apiFetch, setAccessTokenGetter } from './api';
 
 function App() {
     const [screen, setScreen] = useState('start'); // start | register | login | main
@@ -11,6 +11,10 @@ function App() {
     const [refreshChecked, setRefreshChecked] = useState(false);
 
     // При монтировании: если есть refresh token, пробуем refresh
+    useEffect(() => {
+        setAccessTokenGetter(() => accessToken);
+    }, [accessToken]);
+
     useEffect(() => {
         const tryRefresh = async () => {
             const refreshToken = getRefreshToken();
