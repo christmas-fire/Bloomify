@@ -14,6 +14,11 @@ const (
 )
 
 func (h *Handler) userIdentity(c *gin.Context) {
+	if c.Request.Method == "OPTIONS" {
+		c.AbortWithStatus(204)
+		return
+	}
+
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
 		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")

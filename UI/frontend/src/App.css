@@ -1,0 +1,146 @@
+#App {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f6fa;
+}
+
+.registration-form {
+  max-width: 350px;
+  margin: 40px auto;
+  padding: 24px 28px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.registration-form h2 {
+  margin-bottom: 10px;
+  text-align: center;
+  color: #1b2636;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 15px;
+  color: #333;
+}
+
+.form-group input {
+  padding: 8px 10px;
+  border: 1px solid #cfd8dc;
+  border-radius: 5px;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.form-group input:focus {
+  border: 1.5px solid #1b2636;
+}
+
+.btn {
+  background: #1b2636;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 0;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: #22304a;
+}
+
+.success-message {
+  color: #388e3c;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.start-screen {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 40px 36px 32px 36px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  transition: box-shadow 0.2s;
+}
+
+.start-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: #1b2636;
+  margin-bottom: 0.2em;
+  font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.start-subtitle {
+  font-size: 1.15rem;
+  color: #6b7280;
+  margin-bottom: 1.5em;
+  text-align: center;
+}
+
+.start-btn {
+  width: 100%;
+  background: #f6f7f9;
+  color: #1b2636;
+  border: 1.5px solid #e0e3e8;
+  border-radius: 8px;
+  padding: 9px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 7px;
+  transition: background 0.18s, border 0.18s, color 0.18s;
+}
+
+.start-btn:last-child {
+  margin-bottom: 0;
+}
+
+.start-btn:hover {
+  background: #e9eef6;
+  border-color: #bfc8d6;
+  color: #4f5d75;
+}
+
+.form-buttons {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+@media (max-width: 600px) {
+  .start-screen {
+    padding: 24px 8px 20px 8px;
+    max-width: 98vw;
+  }
+  .start-title {
+    font-size: 2rem;
+  }
+}
