@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 
@@ -64,6 +65,10 @@ func (h *Handler) getAllFlowers(c *gin.Context) {
 	}
 
 	flowers, err := h.services.Flower.GetAll()
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, []models.Flower{})
+	}
+
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -134,6 +139,10 @@ func (h *Handler) getFlowersByName(c *gin.Context) {
 	}
 
 	flowers, err := h.services.Flower.GetFlowersByName(name)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, []models.Flower{})
+		return
+	}
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -169,6 +178,10 @@ func (h *Handler) getFlowersByDescription(c *gin.Context) {
 	}
 
 	flowers, err := h.services.Flower.GetFlowersByDescription(description)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, []models.Flower{})
+		return
+	}
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -204,6 +217,10 @@ func (h *Handler) getFlowersByPrice(c *gin.Context) {
 	}
 
 	flowers, err := h.services.Flower.GetFlowersByPrice(price)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, []models.Flower{})
+		return
+	}
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -239,6 +256,10 @@ func (h *Handler) getFlowersByStock(c *gin.Context) {
 	}
 
 	flowers, err := h.services.Flower.GetFlowersByStock(stock)
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, []models.Flower{})
+		return
+	}
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

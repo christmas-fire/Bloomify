@@ -71,8 +71,8 @@ function RegistrationForm({ onSuccess, onBack }) {
                 />
             </div>
             <div className="form-buttons">
-                <button type="submit" className="start-btn">Зарегистрироваться</button>
-                <button type="button" className="start-btn" style={{background:'#f0f1f3', color:'#4f5d75', border:'1.5px solid #e0e3e8'}} onClick={onBack}>Назад</button>
+                <button type="submit" className="start-btn" style={{minWidth:170, padding:'12px 0'}}>Зарегистрироваться</button>
+                <button type="button" className="start-btn" style={{background:'#f0f1f3', color:'#4f5d75', border:'1.5px solid #e0e3e8', minWidth:170, padding:'12px 0'}} onClick={onBack}>Назад</button>
             </div>
             {submitted && <div className="success-message" style={{color:'#388e3c'}} >Регистрация успешна!</div>}
             {error && <div className="success-message" style={{color:'red'}}>{error}</div>}

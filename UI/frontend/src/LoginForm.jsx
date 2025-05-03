@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { apiFetch } from './api';
+import { apiFetch, setAccessToken, setRefreshToken } from './api';
 
 function LoginForm({ onLoginSuccess, onBack }) {
     const [form, setForm] = useState({ username: '', password: '' });
@@ -21,6 +21,8 @@ function LoginForm({ onLoginSuccess, onBack }) {
             });
             if (response.ok) {
                 const data = await response.json();
+                setAccessToken(data.access_token);
+                setRefreshToken(data.refresh_token);
                 onLoginSuccess(data.access_token);
             } else {
                 const error = await response.json();
@@ -59,8 +61,8 @@ function LoginForm({ onLoginSuccess, onBack }) {
                 />
             </div>
             <div className="form-buttons">
-                <button type="submit" className="start-btn">Войти</button>
-                <button type="button" className="start-btn" style={{background:'#f0f1f3', color:'#4f5d75', border:'1.5px solid #e0e3e8'}} onClick={onBack}>Назад</button>
+                <button type="submit" className="start-btn" style={{minWidth:140, padding:'10px 0'}}>Войти</button>
+                <button type="button" className="start-btn" style={{background:'#f0f1f3', color:'#4f5d75', border:'1.5px solid #e0e3e8', minWidth:140, padding:'10px 0'}} onClick={onBack}>Назад</button>
             </div>
             {error && <div className="success-message" style={{color:'red'}}>{error}</div>}
         </form>

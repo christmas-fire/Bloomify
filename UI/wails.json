@@ -9,5 +9,6 @@
   "author": {
     "name": "Бабешко Александр Владимирович",
     "email": "vpiskin335@gmail.com"
-  }
+  },
+  "icon": "frontend/src/assets/images/flower-logo.ico"
 }

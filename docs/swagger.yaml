@@ -142,9 +142,6 @@ definitions:
         type: string
       old_username:
         type: string
-    required:
-    - new_username
-    - old_username
     type: object
   models.User:
     properties:
@@ -1307,6 +1304,33 @@ paths:
       security:
       - BearerAuth: []
       summary: Update user's username
+      tags:
+      - users
+  /api/v1/users/me:
+    get:
+      description: Get info about the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user info
       tags:
       - users
   /auth/refresh:

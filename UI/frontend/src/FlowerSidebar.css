@@ -1,0 +1,80 @@
+.flower-sidebar {
+  width: 270px;
+  min-width: 220px;
+  max-width: 320px;
+  background: #f6f7f9;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 24px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  height: 100%;
+}
+
+.flower-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flower-form-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #1b2636;
+  margin-bottom: 2px;
+}
+
+.flower-input {
+  padding: 8px 10px;
+  border: 1.2px solid #e0e3e8;
+  border-radius: 7px;
+  font-size: 1rem;
+  background: #fff;
+  color: #1b2636;
+  outline: none;
+  transition: border 0.18s;
+}
+.flower-input:focus {
+  border: 1.5px solid #bfc8d6;
+}
+
+.flower-btn {
+  background: #e9eef6;
+  color: #1b2636;
+  border: 1.2px solid #e0e3e8;
+  border-radius: 7px;
+  padding: 8px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.18s, border 0.18s, color 0.18s;
+}
+.flower-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.flower-btn:hover:not(:disabled) {
+  background: #dde3ed;
+  border-color: #bfc8d6;
+}
+
+.flower-success {
+  color: #388e3c;
+  font-size: 0.98rem;
+  margin-top: 2px;
+}
+.flower-error {
+  color: #d32f2f;
+  font-size: 0.98rem;
+  margin-top: 2px;
+}
+
+.flower-sidebar-divider {
+  height: 1px;
+  background: #e0e3e8;
+  margin: 18px 0 10px 0;
+  border-radius: 1px;
+} 

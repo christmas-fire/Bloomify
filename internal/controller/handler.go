@@ -52,6 +52,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			users := v1.Group("/users")
 			{
 				users.GET("/", h.getAllUsers)
+				users.GET("/me", h.getMe)
 				users.GET("/:id", h.getUserById)
 				users.PATCH("/:id/username", h.updateUserUsername)
 				users.PATCH("/:id/password", h.updateUserPassword)
