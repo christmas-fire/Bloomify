@@ -7,6 +7,7 @@ import FlowerFilterPanel from './FlowerFilterPanel';
 import FlowerAddForm from './FlowerAddForm';
 import flowerLogo from './assets/images/flower-logo.png';
 import FlowerCard from './FlowerCard';
+import FlowerEditForm from './FlowerEditForm';
 
 function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
     const [flowers, setFlowers] = useState([]);
@@ -23,6 +24,8 @@ function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
     const [cartOpen, setCartOpen] = useState(false);
     const [cartError, setCartError] = useState(''); // Новое состояние для ошибки корзины
     const [showPurchaseSuccess, setShowPurchaseSuccess] = useState(false); // Состояние для модалки "Спасибо за покупку"
+    const [editModalOpen, setEditModalOpen] = useState(false); // Состояние для модалки редактирования
+    const [editingFlower, setEditingFlower] = useState(null); // Данные редактируемого цветка
 
     const fetchFlowers = useCallback(async () => {
         try {
@@ -327,6 +330,24 @@ function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
         }
     };
 
+    // Открыть модальное окно редактирования
+    const handleOpenEditModal = (flower) => {
+        setEditingFlower(flower);
+        setEditModalOpen(true);
+    };
+
+    // Закрыть модальное окно редактирования
+    const handleCloseEditModal = () => {
+        setEditingFlower(null);
+        setEditModalOpen(false);
+    };
+
+    // Обработчик успешного обновления цветка
+    const handleFlowerUpdated = () => {
+        handleCloseEditModal();
+        fetchFlowers(); // Обновляем список цветов
+    };
+
     const safeFlowers = Array.isArray(flowers) ? flowers : [];
 
     return (
@@ -395,6 +416,7 @@ function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
                                         inCartCount={cart[flower.id] || 0}
                                         onAddToCart={() => handleAddToCart(flower)}
                                         onRemoveFromCart={() => handleRemoveFromCart(flower)}
+                                        onEdit={handleOpenEditModal}
                                     />
                                 ))}
                             </ul>
@@ -404,7 +426,7 @@ function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
             </div>
             {/* Футер */}
             <footer style={{width:'100%', background:'#f6f7f9', color:'#4f5d75', textAlign:'center', padding:'14px 0 10px 0', fontSize:'1.08rem', fontWeight:500, letterSpacing:'0.5px', borderTop:'1.5px solid #e0e3e8'}}>
-                christmas-fire 2025
+                @christmas-fire, 2025
             </footer>
             {/* Модальное окно для добавления цветка */}
             {addModalOpen && (
@@ -556,6 +578,23 @@ function MainScreen({ accessToken, onLogout, onTokenRefresh }) {
                          >
                              Закрыть
                          </button>
+                    </div>
+                </div>
+            )}
+            {/* Модальное окно редактирования цветка */} 
+            {editModalOpen && editingFlower && (
+                 <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(27,38,54,0.32)',zIndex:2600,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                    <div className="modal-content" style={{background:'#fff',borderRadius:16,padding:'32px 28px',boxShadow:'0 8px 32px rgba(0,0,0,0.18)',minWidth:320,maxWidth:400,position:'relative'}}>
+                         <button onClick={handleCloseEditModal} style={{position:'absolute',top:12,right:16,background:'none',border:'none',fontSize:22,cursor:'pointer',color:'#4f5d75'}}>&times;</button>
+                         <div style={{fontSize:'1.4rem', fontWeight:700, color:'#1b2636', marginBottom:18, textAlign:'center'}}>Редактировать цветок</div>
+                         {/* Вставляем форму редактирования */} 
+                         <FlowerEditForm 
+                            flower={editingFlower} 
+                            onClose={handleCloseEditModal} 
+                            onFlowerUpdated={handleFlowerUpdated} 
+                            accessToken={accessToken} 
+                            onTokenRefresh={onTokenRefresh} 
+                         /> 
                     </div>
                 </div>
             )}
