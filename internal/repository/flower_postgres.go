@@ -34,7 +34,7 @@ func (r *FlowerPostgres) GetAll() ([]models.Flower, error) {
 	err := r.db.Select(&flowers, query)
 
 	if len(flowers) == 0 {
-		return nil, sql.ErrNoRows
+		return nil, nil
 	}
 
 	return flowers, err
@@ -59,14 +59,13 @@ func (r *FlowerPostgres) Delete(flowerId int) error {
 
 func (r *FlowerPostgres) GetFlowersByName(name string) ([]models.Flower, error) {
 	var flowers []models.Flower
-	query := "SELECT id, name, description, price, stock FROM flowers WHERE name=$1"
+	query := `SELECT * FROM flowers WHERE name ILIKE '%' || $1 || '%'`
 
 	err := r.db.Select(&flowers, query, name)
 
-	if len(flowers) == 0 {
-		return nil, sql.ErrNoRows
+	if err == sql.ErrNoRows {
+		return []models.Flower{}, nil
 	}
-
 	return flowers, err
 }
 

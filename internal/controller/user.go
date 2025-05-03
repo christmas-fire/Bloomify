@@ -189,3 +189,27 @@ func (h *Handler) deleteUser(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// GetMe godoc
+// @Summary Get current user info
+// @Description Get info about the currently authenticated user
+// @Tags users
+// @Produce json
+// @Success 200 {object} models.User "OK"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal Server Error"
+// @Security BearerAuth
+// @Router /api/v1/users/me [get]
+func (h *Handler) getMe(c *gin.Context) {
+	userId, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+	user, err := h.services.User.GetById(userId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}

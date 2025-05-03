@@ -8,6 +8,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/christmas-fire/Bloomify/docs"
+
+	"github.com/gin-contrib/cors"
 )
 
 type Handler struct {
@@ -20,6 +22,19 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
+	// Глобальный обработчик OPTIONS для всех путей
+	router.OPTIONS("/*path", func(c *gin.Context) {
+		c.Status(204)
+	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -37,6 +52,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			users := v1.Group("/users")
 			{
 				users.GET("/", h.getAllUsers)
+				users.GET("/me", h.getMe)
 				users.GET("/:id", h.getUserById)
 				users.PATCH("/:id/username", h.updateUserUsername)
 				users.PATCH("/:id/password", h.updateUserPassword)
@@ -69,6 +85,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				orders.PATCH("/:id/flower_id", h.updateOrderFlowerId)
 				orders.PATCH("/:id/quantity", h.updateOrderQuantity)
 				orders.DELETE("/:id", h.deleteOrder)
+				orders.DELETE("/flower/:flower_id/", h.removeFlowerFromOrder)
+				orders.PATCH("/flower/:flower_id/increment/", h.incrementFlowerQuantity)
+				orders.PATCH("/flower/:flower_id/decrement/", h.decrementFlowerQuantity)
+				orders.DELETE("/active", h.deleteActiveOrder)
 			}
 
 			order_flowers := v1.Group("/order_flowers")

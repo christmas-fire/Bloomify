@@ -6,7 +6,7 @@ SRC_DIRS := ./...
 default: run
 
 # Цель для запуска приложения
-run:
+backend-build:
 	@echo "Generating documentation with swag..."
 	@swag init -g cmd/main.go
 	@echo "Documentation generated."
@@ -35,4 +35,16 @@ test:
 clean:
 	@echo "Stopping Bloomify..."
 	@docker-compose down
+
+frontend-build:
+	@echo "Building UI..."
+	@cd UI && wails build 
+
+frontend-run-linux:
+	@echo "Running UI..."
+	@./UI/build/bin/Bloomify
+
+frontend-run-windows:
+	@echo "Running UI..."
+	@./UI/build/bin/Bloomify.exe
 
