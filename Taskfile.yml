@@ -1,16 +1,13 @@
 version: '3'
 
-vars:
-  COMPOSE_FILE: docker-compose.yml
-
 tasks:
   default:
-    desc: "Показывает доступные задачи"
+    desc: "Показывает доступные задачи."
     cmds:
       - task --list-all
 
   up:
-    desc: "Собрать образы (при необходимости) и запустить все сервисы в фоновом режиме."
+    desc: "Собрать образы и запустить все сервисы в фоновом режиме."
     cmds:
       - docker-compose up -d --build
 
@@ -25,22 +22,27 @@ tasks:
       - docker-compose stop
 
   down:
-    desc: "Остановить и удалить контейнеры, сети."
+    desc: "Остановить и удалить контейнеры."
     cmds:
       - docker-compose down
 
   clean:
-    desc: "Остановить, удалить контейнеры, сети И УДАЛИТЬ ТОМА ДАННЫХ (например, БД)."
-    prompt: "ВНИМАНИЕ: Эта команда удалит все данные из PostgreSQL. Вы уверены? (y/N)"
+    desc: "Остановить, удалить контейнеры, сети и тома данных."
+    prompt: "Вы уверены? (y/n)"
     cmds:
       - docker-compose down -v
 
   logs:
-    desc: "Показать логи всех сервисов. `task logs -- [service_name]` для конкретного сервиса."
+    desc: "Показать логи всех сервисов."
     cmds:
-      - docker-compose -f {{.COMPOSE_FILE}} logs -f {{.CLI_ARGS}}
+      - docker-compose logs
 
   ps:
     desc: "Показать статус контейнеров."
     cmds:
       - docker-compose ps
+  
+  swag:
+    desc: "Сгенерировать документацию Swagger UI."
+    cmds:
+      - swag init -g ./backend/cmd/main.go -o ./backend/docs
