@@ -5,8 +5,6 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/repository"
 )
 
-//go:generate mockgen -source=service.go -destination=mocks/mock.go
-
 type Auth interface {
 	CreateUser(user models.User) (int, error)
 	GenerateToken(username, password string) (string, error)
