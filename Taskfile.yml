@@ -1,0 +1,46 @@
+version: '3'
+
+vars:
+  COMPOSE_FILE: docker-compose.yml
+
+tasks:
+  default:
+    desc: "Показывает доступные задачи"
+    cmds:
+      - task --list-all
+
+  up:
+    desc: "Собрать образы (при необходимости) и запустить все сервисы в фоновом режиме."
+    cmds:
+      - docker-compose up -d --build
+
+  start:
+    desc: "Запустить существующие контейнеры (без пересборки)."
+    cmds:
+      - docker-compose up -d
+
+  stop:
+    desc: "Остановить запущенные сервисы."
+    cmds:
+      - docker-compose stop
+
+  down:
+    desc: "Остановить и удалить контейнеры, сети."
+    cmds:
+      - docker-compose down
+
+  clean:
+    desc: "Остановить, удалить контейнеры, сети И УДАЛИТЬ ТОМА ДАННЫХ (например, БД)."
+    prompt: "ВНИМАНИЕ: Эта команда удалит все данные из PostgreSQL. Вы уверены? (y/N)"
+    cmds:
+      - docker-compose down -v
+
+  logs:
+    desc: "Показать логи всех сервисов. `task logs -- [service_name]` для конкретного сервиса."
+    cmds:
+      - docker-compose -f {{.COMPOSE_FILE}} logs -f {{.CLI_ARGS}}
+
+  ps:
+    desc: "Показать статус контейнеров."
+    cmds:
+      - docker-compose ps

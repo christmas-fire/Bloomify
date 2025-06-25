@@ -1,29 +1,53 @@
-version: '3'
 services:
-  app:
-    build: .
+  backend:
+    build: ./backend
     ports:
-      - "8080:8080"
-    volumes:
-      - .:/app
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      BACKEND_PORT: ${BACKEND_PORT}
+      SALT: ${SALT}
+      SIGNING_KEY: ${SIGNING_KEY}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      backend:
+        condition: service_started
+
   db:
-    image: postgres:latest
+    image: postgres:15-alpine
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5433"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  nocodb:
+    image: nocodb/nocodb:latest
+    restart: always
+    ports: 
+      - "${NOCODB_PORT}:${NOCODB_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - "nocodb_data:/usr/app/data"
 
 volumes:
-  pgdata:
+  postgres_data: {}
+  nocodb_data: {}
