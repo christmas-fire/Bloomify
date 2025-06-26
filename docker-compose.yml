@@ -12,13 +12,13 @@ services:
       db:
         condition: service_healthy
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    depends_on:
-      backend:
-        condition: service_started
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
 
   db:
     image: postgres:15-alpine
