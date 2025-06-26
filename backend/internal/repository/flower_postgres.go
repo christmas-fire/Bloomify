@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -10,11 +11,12 @@ import (
 )
 
 type FlowerPostgres struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger *slog.Logger
 }
 
-func NewFlowerPostgres(db *sqlx.DB) *FlowerPostgres {
-	return &FlowerPostgres{db: db}
+func NewFlowerPostgres(db *sqlx.DB, logger *slog.Logger) *FlowerPostgres {
+	return &FlowerPostgres{db: db, logger: logger}
 }
 
 func (r *FlowerPostgres) CreateFlower(flower models.Flower) (int, error) {

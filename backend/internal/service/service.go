@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log/slog"
+
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 )
@@ -58,13 +60,13 @@ type Service struct {
 	Order
 }
 
-func NewService(repos *repository.Repository) *Service {
-	authService := NewAuthService(*repos)
+func NewService(repos *repository.Repository, logger *slog.Logger) *Service {
+	authService := NewAuthService(*repos, logger)
 
 	return &Service{
 		Auth:   authService,
-		User:   NewUserService(repos.User),
-		Flower: NewFlowerService(repos.Flower),
-		Order:  NewOrderService(repos.Order),
+		User:   NewUserService(repos.User, logger),
+		Flower: NewFlowerService(repos.Flower, logger),
+		Order:  NewOrderService(repos.Order, logger),
 	}
 }

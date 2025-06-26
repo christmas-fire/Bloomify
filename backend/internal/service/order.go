@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log/slog"
 	"strconv"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -8,11 +9,12 @@ import (
 )
 
 type OrderService struct {
-	repo repository.Order
+	repo   repository.Order
+	logger *slog.Logger
 }
 
-func NewOrderService(repo repository.Order) *OrderService {
-	return &OrderService{repo: repo}
+func NewOrderService(repo repository.Order, logger *slog.Logger) *OrderService {
+	return &OrderService{repo: repo, logger: logger}
 }
 
 func (s *OrderService) CreateOrder(userId int, order_flowers models.OrderFlowers) (int, error) {
@@ -62,23 +64,23 @@ func (s *OrderService) Delete(orderId int) error {
 
 // RemoveFlowerFromOrder удаляет цветок из заказа пользователя
 func (s *OrderService) RemoveFlowerFromOrder(userId int, flowerId int) error {
-	// logrus.Infof("Service: RemoveFlowerFromOrder started for userId: %d, flowerId: %d", userId, flowerId)
+	s.logger.Info("Service: RemoveFlowerFromOrder started", "userId", userId, "flowerId", flowerId)
 	err := s.repo.RemoveFlowerFromOrderByUser(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Service: RemoveFlowerFromOrder - repository error: %v", err)
+		s.logger.Error("Service: RemoveFlowerFromOrder - repository error", "error", err)
 	}
-	// logrus.Infof("Service: RemoveFlowerFromOrder finished")
+	s.logger.Info("Service: RemoveFlowerFromOrder finished")
 	return err
 }
 
 // IncrementFlowerQuantity увеличивает количество цветка в заказе пользователя на 1
 func (s *OrderService) IncrementFlowerQuantity(userId int, flowerId int) error {
-	// logrus.Infof("Service: IncrementFlowerQuantity started for userId: %d, flowerId: %d", userId, flowerId)
+	s.logger.Info("Service: IncrementFlowerQuantity started", "userId", userId, "flowerId", flowerId)
 	err := s.repo.IncrementFlowerQuantity(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Service: IncrementFlowerQuantity - repository error: %v", err)
+		s.logger.Error("Service: IncrementFlowerQuantity - repository error", "error", err)
 	}
-	// logrus.Infof("Service: IncrementFlowerQuantity finished")
+	s.logger.Info("Service: IncrementFlowerQuantity finished")
 	return err
 }
 
@@ -86,12 +88,12 @@ func (s *OrderService) IncrementFlowerQuantity(userId int, flowerId int) error {
 // Если количество становится 0, цветок удаляется из заказа.
 // Может вернуть специальную ошибку ErrFlowerRemoved (нужно определить).
 func (s *OrderService) DecrementFlowerQuantity(userId int, flowerId int) error {
-	// logrus.Infof("Service: DecrementFlowerQuantity started for userId: %d, flowerId: %d", userId, flowerId)
+	s.logger.Info("Service: DecrementFlowerQuantity started", "userId", userId, "flowerId", flowerId)
 	err := s.repo.DecrementFlowerQuantity(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Service: DecrementFlowerQuantity - repository error: %v", err)
+		s.logger.Error("Service: DecrementFlowerQuantity - repository error", "error", err)
 	}
-	// logrus.Infof("Service: DecrementFlowerQuantity finished")
+	s.logger.Info("Service: DecrementFlowerQuantity finished")
 	return err
 }
 

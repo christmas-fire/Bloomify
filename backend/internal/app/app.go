@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,10 +12,10 @@ import (
 
 	"github.com/christmas-fire/Bloomify/internal/controller"
 	"github.com/christmas-fire/Bloomify/internal/database"
+	"github.com/christmas-fire/Bloomify/internal/logger"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/jmoiron/sqlx"
-	"github.com/sirupsen/logrus"
 )
 
 // Структура приложения
@@ -24,10 +25,13 @@ type App struct {
 	repository *repository.Repository
 	server     *http.Server
 	db         *sqlx.DB
+	logger     *slog.Logger
 }
 
 // Создание нового приложения
 func NewApp() (*App, error) {
+	logger := logger.InitLogger()
+
 	db, err := database.InitPostgres()
 	if err != nil {
 		return nil, err
@@ -38,9 +42,9 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	repository := repository.NewRepository(db)
-	service := service.NewService(repository)
-	handler := controller.NewHandler(service)
+	repository := repository.NewRepository(db, logger)
+	service := service.NewService(repository, logger)
+	handler := controller.NewHandler(service, logger)
 
 	server := &http.Server{
 		Addr:    ":" + os.Getenv("BACKEND_PORT"),
@@ -53,6 +57,7 @@ func NewApp() (*App, error) {
 		repository: repository,
 		server:     server,
 		db:         db,
+		logger:     logger,
 	}, nil
 }
 
@@ -61,16 +66,16 @@ func (a *App) Run() error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		logrus.Printf("Starting server on http://localhost:%s", os.Getenv("BACKEND_PORT"))
-		logrus.Printf("Documentation on http://localhost:%s/swagger/index.html#/", os.Getenv("BACKEND_PORT"))
+		a.logger.Info("Starting server", "port", os.Getenv("BACKEND_PORT"))
+		a.logger.Info("Documentation on", "url", "http://localhost:"+os.Getenv("BACKEND_PORT")+"/swagger/index.html#/")
 
 		if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logrus.Fatalf("Failed to start server: %v", err)
+			a.logger.Error("Failed to start server", "error", err)
 		}
 	}()
 
 	<-quit
-	logrus.Println("Shutting down server...")
+	a.logger.Info("Shutting down server...")
 
 	// Даем 30 секунд на завершение текущих запросов
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -78,19 +83,19 @@ func (a *App) Run() error {
 
 	// Выключаем сервер
 	if err := a.server.Shutdown(ctx); err != nil {
-		logrus.Fatalf("Server forced to shutdown: %v", err)
+		a.logger.Error("Server forced to shutdown", "error", err)
 	}
 
 	// Закрываем остальные ресурсы, например, соединение с БД
 	if err := a.Close(); err != nil {
-		logrus.Errorf("Failed to close resources: %v", err)
+		a.logger.Error("Failed to close resources", "error", err)
 	}
 
-	logrus.Println("Server exiting")
+	a.logger.Info("Server exiting")
 	return nil
 }
 
 func (a *App) Close() error {
-	logrus.Println("Closing database connection...")
+	a.logger.Info("Closing database connection...")
 	return a.db.Close()
 }

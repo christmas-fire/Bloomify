@@ -2,17 +2,19 @@ package repository
 
 import (
 	"database/sql"
+	"log/slog"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/jmoiron/sqlx"
 )
 
 type UserPostgres struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger *slog.Logger
 }
 
-func NewUserPostgres(db *sqlx.DB) *UserPostgres {
-	return &UserPostgres{db: db}
+func NewUserPostgres(db *sqlx.DB, logger *slog.Logger) *UserPostgres {
+	return &UserPostgres{db: db, logger: logger}
 }
 
 func (r *UserPostgres) GetAll() ([]models.User, error) {

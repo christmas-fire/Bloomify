@@ -8,9 +8,9 @@ type OrderFlowerInfo struct {
 
 type Order struct {
 	Id         int               `json:"id" db:"id"`
-	UserId     int               `json:"user_id" db:"user_id" binding:"required"`
-	OrderDate  string            `json:"order_date" db:"order_date" binding:"required"`
-	TotalPrice string            `json:"total_price" db:"total_price" binding:"required"`
+	UserId     int               `json:"user_id" db:"user_id"`
+	OrderDate  string            `json:"order_date" db:"order_date"`
+	TotalPrice string            `json:"total_price" db:"total_price"`
 	Flowers    []OrderFlowerInfo `json:"flowers,omitempty"` // Добавляем поле для цветов
 }
 

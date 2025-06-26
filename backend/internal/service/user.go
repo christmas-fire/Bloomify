@@ -2,17 +2,19 @@ package service
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 )
 
 type UserService struct {
-	repo repository.User
+	repo   repository.User
+	logger *slog.Logger
 }
 
-func NewUserService(repo repository.User) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo repository.User, logger *slog.Logger) *UserService {
+	return &UserService{repo: repo, logger: logger}
 }
 
 func (s *UserService) GetAll() ([]models.User, error) {

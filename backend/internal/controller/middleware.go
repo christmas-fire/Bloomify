@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,24 @@ const (
 	authorizationHeader = "Authorization"
 	userCtx             = "userId"
 )
+
+func (h *Handler) LoggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+
+		c.Next()
+
+		duration := time.Since(start)
+
+		h.logger.Info("Request completed",
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+			"status", c.Writer.Status(),
+			"duration_ms", duration.Milliseconds(),
+			"client_ip", c.ClientIP(),
+		)
+	}
+}
 
 func (h *Handler) userIdentity(c *gin.Context) {
 	if c.Request.Method == "OPTIONS" {

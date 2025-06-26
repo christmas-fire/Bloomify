@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -9,11 +10,12 @@ import (
 )
 
 type AuthPostgres struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger *slog.Logger
 }
 
-func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
-	return &AuthPostgres{db: db}
+func NewAuthPostgres(db *sqlx.DB, logger *slog.Logger) *AuthPostgres {
+	return &AuthPostgres{db: db, logger: logger}
 }
 
 func (r *AuthPostgres) CreateUser(user models.User) (int, error) {

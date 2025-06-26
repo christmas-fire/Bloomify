@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -10,11 +11,12 @@ import (
 )
 
 type OrderPostgres struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger *slog.Logger
 }
 
-func NewOrderPostgres(db *sqlx.DB) *OrderPostgres {
-	return &OrderPostgres{db: db}
+func NewOrderPostgres(db *sqlx.DB, logger *slog.Logger) *OrderPostgres {
+	return &OrderPostgres{db: db, logger: logger}
 }
 
 func (r *OrderPostgres) CreateOrder(userId int, orderFlower models.OrderFlowers) (int, error) {

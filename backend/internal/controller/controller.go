@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"log/slog"
+
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
 
@@ -14,16 +16,17 @@ import (
 
 type Handler struct {
 	services *service.Service
+	logger   *slog.Logger
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(services *service.Service, logger *slog.Logger) *Handler {
+	return &Handler{services: services, logger: logger}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	router.Use(gin.Logger())
+	router.Use(h.LoggingMiddleware())
 
 	router.Use(gin.Recovery())
 
@@ -99,7 +102,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				order_flowers.GET("/", h.getAllOrderFlowers)
 				order_flowers.GET("/:id", h.getOrderFlowersByOrderId)
 			}
-
 		}
 	}
 

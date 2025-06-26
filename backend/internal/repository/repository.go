@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log/slog"
+
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -57,11 +59,11 @@ type Repository struct {
 	Order
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+func NewRepository(db *sqlx.DB, logger *slog.Logger) *Repository {
 	return &Repository{
-		Auth:   NewAuthPostgres(db),
-		User:   NewUserPostgres(db),
-		Flower: NewFlowerPostgres(db),
-		Order:  NewOrderPostgres(db),
+		Auth:   NewAuthPostgres(db, logger),
+		User:   NewUserPostgres(db, logger),
+		Flower: NewFlowerPostgres(db, logger),
+		Order:  NewOrderPostgres(db, logger),
 	}
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -9,11 +10,12 @@ import (
 )
 
 type FlowerService struct {
-	repo repository.Flower
+	repo   repository.Flower
+	logger *slog.Logger
 }
 
-func NewFlowerService(repo repository.Flower) *FlowerService {
-	return &FlowerService{repo: repo}
+func NewFlowerService(repo repository.Flower, logger *slog.Logger) *FlowerService {
+	return &FlowerService{repo: repo, logger: logger}
 }
 
 func (s *FlowerService) CreateFlower(flower models.Flower) (int, error) {

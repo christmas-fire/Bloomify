@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -26,11 +26,12 @@ type customClaims struct {
 }
 
 type AuthService struct {
-	repo repository.Repository
+	repo   repository.Repository
+	logger *slog.Logger
 }
 
-func NewAuthService(repo repository.Repository) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(repo repository.Repository, logger *slog.Logger) *AuthService {
+	return &AuthService{repo: repo, logger: logger}
 }
 
 func (s *AuthService) CreateUser(user models.User) (int, error) {
@@ -79,7 +80,7 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 		return []byte(signingKey), nil
 	})
 	if err != nil {
-		logrus.Errorf("Error parsing token: %v", err)
+		s.logger.Error("Error parsing token", "error", err)
 		return 0, err
 	}
 
