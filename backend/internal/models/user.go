@@ -9,12 +9,12 @@ type User struct {
 }
 
 type UpdateUsernameInput struct {
-	OldUsername string `json:"old_username" binding:"required"`
-	NewUsername string `json:"new_username" binding:"required"`
+	OldUsername string `json:"oldUsername" binding:"required"`
+	NewUsername string `json:"newUsername" binding:"required"`
 }
 
 type UpdatePasswordInput struct {
 	Username    string `json:"username" binding:"required"`
-	OldPassword string `json:"old_password" binding:"required"`
-	NewPassword string `json:"new_password" binding:"required"`
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required"`
 }
