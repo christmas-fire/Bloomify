@@ -1,29 +1,91 @@
-version: '3'
 services:
-  app:
-    build: .
+  backend:
+    build: ./backend
     ports:
-      - "8080:8080"
-    volumes:
-      - .:/app
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      BACKEND_PORT: ${BACKEND_PORT}
+      SALT: ${SALT}
+      SIGNING_KEY: ${SIGNING_KEY}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+  #   depends_on:
+  #     backend:
+  #       condition: service_started
+
   db:
-    image: postgres:latest
+    image: postgres:15-alpine
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5433"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  nocodb:
+    image: nocodb/nocodb:latest
+    restart: always
+    ports: 
+      - "${NOCODB_PORT}:${NOCODB_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - "nocodb_data:/usr/app/data"
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      backend:
+        condition: service_started
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/config.yml
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - promtail_positions:/tmp/positions
+    command: -config.file=/etc/promtail/config.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
 
 volumes:
-  pgdata:
+  postgres_data: {}
+  nocodb_data: {}
+  loki_data: {}
+  promtail_positions: {}
