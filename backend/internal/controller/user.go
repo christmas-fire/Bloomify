@@ -20,15 +20,15 @@ import (
 // @Security BearerAuth
 // @Router /api/v1/users [get]
 func (h *Handler) getAllUsers(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	users, err := h.services.User.GetAll()
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -49,21 +49,21 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/users/{id} [get]
 func (h *Handler) getUserById(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	user, err := h.services.User.GetById(id)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -85,26 +85,26 @@ func (h *Handler) getUserById(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/users/{id}/username [patch]
 func (h *Handler) updateUserUsername(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	var input models.UpdateUsernameInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.User.UpdateUsername(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -128,26 +128,26 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/users/{id}/password [patch]
 func (h *Handler) updateUserPassword(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	var input models.UpdatePasswordInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.User.UpdatePassword(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -170,20 +170,20 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/users/{id} [delete]
 func (h *Handler) deleteUser(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	if err := h.services.User.Delete(id); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -201,14 +201,14 @@ func (h *Handler) deleteUser(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/users/me [get]
 func (h *Handler) getMe(c *gin.Context) {
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 	user, err := h.services.User.GetById(userId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, user)

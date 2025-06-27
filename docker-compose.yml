@@ -48,6 +48,44 @@ services:
     volumes:
       - "nocodb_data:/usr/app/data"
 
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      backend:
+        condition: service_started
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/config.yml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/config.yml
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - promtail_positions:/tmp/positions
+    command: -config.file=/etc/promtail/config.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+
 volumes:
   postgres_data: {}
   nocodb_data: {}
+  loki_data: {}
+  promtail_positions: {}

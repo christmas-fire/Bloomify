@@ -3,8 +3,10 @@ package controller
 import (
 	"log/slog"
 
+	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
@@ -17,16 +19,18 @@ import (
 type Handler struct {
 	services *service.Service
 	logger   *slog.Logger
+	metrics  *metrics.Metrics
 }
 
-func NewHandler(services *service.Service, logger *slog.Logger) *Handler {
-	return &Handler{services: services, logger: logger}
+func NewHandler(services *service.Service, logger *slog.Logger, metrics *metrics.Metrics) *Handler {
+	return &Handler{services: services, logger: logger, metrics: metrics}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
 	router.Use(h.LoggingMiddleware())
+	router.Use(h.MetricsMiddleware())
 
 	router.Use(gin.Recovery())
 
@@ -44,6 +48,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	auth := router.Group("/auth")
 	{

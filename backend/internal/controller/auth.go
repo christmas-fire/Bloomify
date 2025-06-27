@@ -22,13 +22,13 @@ import (
 func (h *Handler) signUp(c *gin.Context) {
 	var input models.User
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+				newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	id, err := h.services.Auth.CreateUser(input)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -57,16 +57,16 @@ type signInInput struct {
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	token, err := h.services.Auth.GenerateToken(input.Username, input.Password)
 	if err != nil {
 		if errors.Is(err, errors.New("invalid username or password")) {
-			newErrorResponse(c, http.StatusUnauthorized, err.Error())
+			newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		} else {
-			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+			newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}

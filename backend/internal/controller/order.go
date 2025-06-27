@@ -23,21 +23,21 @@ import (
 // @Security BearerAuth
 // @Router /api/v1/orders [post]
 func (h *Handler) createOrder(c *gin.Context) {
-	id, err := getUserId(c)
+	id, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	var input models.OrderFlowers
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	order_id, err := h.services.Order.CreateOrder(id, input)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *Handler) createOrder(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders [get]
 func (h *Handler) getAllOrders(c *gin.Context) {
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
 		// getUserId уже отправил ошибку
 		return
@@ -67,7 +67,7 @@ func (h *Handler) getAllOrders(c *gin.Context) {
 	// Используем GetOrdersByUserId вместо GetAll
 	orders, err := h.services.Order.GetOrdersByUserId(strconv.Itoa(userId))
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -93,21 +93,21 @@ func (h *Handler) getAllOrders(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/{id} [get]
 func (h *Handler) getOrderById(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	order, err := h.services.Order.GetById(id)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -128,21 +128,21 @@ func (h *Handler) getOrderById(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/user_id [get]
 func (h *Handler) getOrdersByUserId(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	user_id := c.Query("user_id")
 	if user_id == "" {
-		newErrorResponse(c, http.StatusBadRequest, "not found query param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "not found query param")
 		return
 	}
 
 	orders, err := h.services.Order.GetOrdersByUserId(user_id)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -164,26 +164,26 @@ func (h *Handler) getOrdersByUserId(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/{id} [put]
 func (h *Handler) updateOrder(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	var input models.UpdateOrderInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.Order.UpdateOrder(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -207,26 +207,26 @@ func (h *Handler) updateOrder(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/{id}/flower_id [patch]
 func (h *Handler) updateOrderFlowerId(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	var input models.UpdateOrderFlowerIdInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.Order.UpdateOrderFlowerId(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -250,26 +250,26 @@ func (h *Handler) updateOrderFlowerId(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/{id}/quantity [patch]
 func (h *Handler) updateOrderQuantity(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	var input models.UpdateOrderQuantityInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.Order.UpdateOrderQuantity(id, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -292,20 +292,20 @@ func (h *Handler) updateOrderQuantity(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/{id} [delete]
 func (h *Handler) deleteOrder(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	if err := h.services.Order.Delete(id); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -324,15 +324,15 @@ func (h *Handler) deleteOrder(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/order_flowers [get]
 func (h *Handler) getAllOrderFlowers(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	orderFlowers, err := h.services.Order.GetAllOrderFlowers()
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -353,21 +353,21 @@ func (h *Handler) getAllOrderFlowers(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/order_flowers/{id} [get]
 func (h *Handler) getOrderFlowersByOrderId(c *gin.Context) {
-	_, err := getUserId(c)
+	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
 		return
 	}
 
 	orderFlowers, err := h.services.Order.GetOrderFlowersByOrderId(id)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -388,26 +388,22 @@ func (h *Handler) getOrderFlowersByOrderId(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/flower/{flower_id} [delete]
 func (h *Handler) removeFlowerFromOrder(c *gin.Context) {
-	// logrus.Infof("Handler: removeFlowerFromOrder started")
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
-		// logrus.Errorf("Handler: removeFlowerFromOrder - getUserId error: %v", err)
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	flowerIdStr := c.Param("flower_id")
 	flowerId, err := strconv.Atoi(flowerIdStr)
 	if err != nil {
-		// logrus.Errorf("Handler: removeFlowerFromOrder - invalid flower_id param: %s", flowerIdStr)
-		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid flower_id param")
 		return
 	}
 
-	// logrus.Infof("Handler: removeFlowerFromOrder - calling service for userId: %d, flowerId: %d", userId, flowerId)
 	err = h.services.Order.RemoveFlowerFromOrder(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Handler: removeFlowerFromOrder - service error: %v", err)
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -429,30 +425,25 @@ func (h *Handler) removeFlowerFromOrder(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/orders/flower/{flower_id}/increment [patch]
 func (h *Handler) incrementFlowerQuantity(c *gin.Context) {
-	// logrus.Infof("Handler: incrementFlowerQuantity started")
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
-		// logrus.Errorf("Handler: incrementFlowerQuantity - getUserId error: %v", err)
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	flowerIdStr := c.Param("flower_id")
 	flowerId, err := strconv.Atoi(flowerIdStr)
 	if err != nil {
-		// logrus.Errorf("Handler: incrementFlowerQuantity - invalid flower_id param: %s", flowerIdStr)
-		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid flower_id param")
 		return
 	}
 
-	// logrus.Infof("Handler: incrementFlowerQuantity - calling service for userId: %d, flowerId: %d", userId, flowerId)
 	err = h.services.Order.IncrementFlowerQuantity(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Handler: incrementFlowerQuantity - service error: %v", err)
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// logrus.Infof("Handler: incrementFlowerQuantity finished successfully")
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
 
@@ -472,45 +463,40 @@ func (h *Handler) incrementFlowerQuantity(c *gin.Context) {
 // @Router /api/v1/orders/flower/{flower_id}/decrement [patch]
 func (h *Handler) decrementFlowerQuantity(c *gin.Context) {
 	// logrus.Infof("Handler: decrementFlowerQuantity started")
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
-		// logrus.Errorf("Handler: decrementFlowerQuantity - getUserId error: %v", err)
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	flowerIdStr := c.Param("flower_id")
 	flowerId, err := strconv.Atoi(flowerIdStr)
 	if err != nil {
-		// logrus.Errorf("Handler: decrementFlowerQuantity - invalid flower_id param: %s", flowerIdStr)
-		newErrorResponse(c, http.StatusBadRequest, "invalid flower_id param")
+		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid flower_id param")
 		return
 	}
 
-	// logrus.Infof("Handler: decrementFlowerQuantity - calling service for userId: %d, flowerId: %d", userId, flowerId)
 	err = h.services.Order.DecrementFlowerQuantity(userId, flowerId)
 	if err != nil {
-		// logrus.Errorf("Handler: decrementFlowerQuantity - service error: %v", err)
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// logrus.Infof("Handler: decrementFlowerQuantity finished successfully")
 	c.JSON(http.StatusOK, statusResponse{Status: "ok"})
 }
 
-// deleteActiveOrder обрабатывает запрос на удаление активного заказа (корзины) пользователя
 func (h *Handler) deleteActiveOrder(c *gin.Context) {
-	userId, err := getUserId(c)
+	userId, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found in context")
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, "user id not found in context")
 		return
 	}
 
 	err = h.services.Order.DeleteActiveOrder(userId)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, fmt.Sprintf("error deleting active order: %s", err.Error()))
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, fmt.Sprintf("error deleting active order: %s", err.Error()))
 		return
 	}
 
-	c.Status(http.StatusNoContent) // Успешное удаление, нет тела ответа
+	c.Status(http.StatusNoContent)
 }

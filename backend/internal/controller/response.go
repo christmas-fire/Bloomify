@@ -1,8 +1,9 @@
 package controller
 
 import (
+	"log/slog"
+
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 type errorResponse struct {
@@ -13,7 +14,7 @@ type statusResponse struct {
 	Status string `json:"status"`
 }
 
-func newErrorResponse(c *gin.Context, statusCode int, message string) {
-	logrus.Error(message)
+func newErrorResponse(c *gin.Context, logger *slog.Logger, statusCode int, message string) {
+	logger.Error(message)
 	c.AbortWithStatusJSON(statusCode, errorResponse{Message: message})
 }

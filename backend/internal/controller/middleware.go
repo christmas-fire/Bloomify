@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,37 +41,50 @@ func (h *Handler) userIdentity(c *gin.Context) {
 
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
-		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, "empty auth header")
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		newErrorResponse(c, http.StatusUnauthorized, "invalid auth header")
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, "invalid auth header")
 		return
 	}
 
 	userId, err := h.services.Auth.ParseToken(headerParts[1])
 	if err != nil {
-		newErrorResponse(c, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
 	c.Set(userCtx, userId)
 }
 
-func getUserId(c *gin.Context) (int, error) {
+func (h *Handler) getUserId(c *gin.Context) (int, error) {
 	id, ok := c.Get(userCtx)
 	if !ok {
-		newErrorResponse(c, http.StatusInternalServerError, "user id not found")
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, "user id not found")
 		return 0, errors.New("user id not found")
 	}
 
 	idInt, ok := id.(int)
 	if !ok {
-		newErrorResponse(c, http.StatusInternalServerError, "user id invalid type")
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, "user id invalid type")
 		return 0, errors.New("user id invalid type")
 	}
 
 	return idInt, nil
+}
+
+func (h *Handler) MetricsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		duration := time.Since(start)
+
+		h.metrics.HttpRequestsTotal.WithLabelValues(c.Request.Method, c.FullPath(), strconv.Itoa(c.Writer.Status())).
+			Inc()
+		h.metrics.HttpRequestsLatency.WithLabelValues(c.Request.Method, c.FullPath()).
+			Observe(duration.Seconds())
+	}
 }

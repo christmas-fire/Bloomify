@@ -13,6 +13,7 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/controller"
 	"github.com/christmas-fire/Bloomify/internal/database"
 	"github.com/christmas-fire/Bloomify/internal/logger"
+	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/jmoiron/sqlx"
@@ -26,6 +27,7 @@ type App struct {
 	server     *http.Server
 	db         *sqlx.DB
 	logger     *slog.Logger
+	metrics    *metrics.Metrics
 }
 
 // Создание нового приложения
@@ -42,9 +44,10 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	metrics := metrics.NewMetrics()
 	repository := repository.NewRepository(db, logger)
 	service := service.NewService(repository, logger)
-	handler := controller.NewHandler(service, logger)
+	handler := controller.NewHandler(service, logger, metrics)
 
 	server := &http.Server{
 		Addr:    ":" + os.Getenv("BACKEND_PORT"),
@@ -58,6 +61,7 @@ func NewApp() (*App, error) {
 		server:     server,
 		db:         db,
 		logger:     logger,
+		metrics:    metrics,
 	}, nil
 }
 
