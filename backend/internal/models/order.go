@@ -6,17 +6,18 @@ type OrderFlowerInfo struct {
 	Quantity int `json:"quantity"`
 }
 
+// Модель заказа
 type Order struct {
-	Id         int               `json:"id" db:"id"`
-	UserId     int               `json:"user_id" db:"user_id"`
-	OrderDate  string            `json:"order_date" db:"order_date"`
-	TotalPrice string            `json:"total_price" db:"total_price"`
+	Id         int               `json:"id" db:"id"`                // ID заказа
+	UserId     int               `json:"userId" db:"user_id"`       // ID пользователя, который сделал заказ
+	OrderDate  string            `json:"orderDate" db:"order_date"` // Дата
+	TotalPrice string            `json:"totalPrice" db:"total_price"`
 	Flowers    []OrderFlowerInfo `json:"flowers,omitempty"` // Добавляем поле для цветов
 }
 
 type OrderFlowers struct {
-	OrderId  int `json:"order_id" db:"order_id"`
-	FlowerId int `json:"flower_id" db:"flower_id" binding:"required"`
+	OrderId  int `json:"orderId" db:"order_id"`
+	FlowerId int `json:"flowerId" db:"flower_id" binding:"required"`
 	Quantity int `json:"quantity" db:"quantity" binding:"required"`
 }
 

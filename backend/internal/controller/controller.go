@@ -6,6 +6,7 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -17,13 +18,19 @@ import (
 )
 
 type Handler struct {
-	services *service.Service
-	logger   *slog.Logger
-	metrics  *metrics.Metrics
+	services  *service.Service
+	validator *validator.Validate
+	logger    *slog.Logger
+	metrics   *metrics.Metrics
 }
 
-func NewHandler(services *service.Service, logger *slog.Logger, metrics *metrics.Metrics) *Handler {
-	return &Handler{services: services, logger: logger, metrics: metrics}
+func NewHandler(services *service.Service, validator *validator.Validate, logger *slog.Logger, metrics *metrics.Metrics) *Handler {
+	return &Handler{
+		services:  services,
+		validator: validator,
+		logger:    logger,
+		metrics:   metrics,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {

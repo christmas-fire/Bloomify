@@ -8,15 +8,15 @@ import (
 )
 
 type Auth interface {
-	CreateUser(user models.User) (int, error)
+	CreateUser(username, email, password string) (int, error)
 	GetUser(username, password string) (models.User, error)
 }
 
 type User interface {
 	GetAll() ([]models.User, error)
 	GetById(userId int) (models.User, error)
-	UpdateUsername(userId int, input models.UpdateUsernameInput) error
-	UpdatePassword(userId int, input models.UpdatePasswordInput) error
+	UpdateUsername(userId int, oldUsername, newUsername string) error
+	UpdatePassword(userId int, username, oldPassword, newPassword string) error
 	Delete(userId int) error
 }
 

@@ -8,16 +8,16 @@ import (
 )
 
 type Auth interface {
-	CreateUser(user models.User) (int, error)
+	CreateUser(username, email, password string) (int, error)
 	GenerateToken(username, password string) (string, error)
 	ParseToken(accessToken string) (int, error)
 }
 
 type User interface {
-	GetAll() ([]models.User, error)
+	GetAll() ([]models.User, error) // возвращать отдельно каждое поле а потом маппить с DTO response
 	GetById(userId int) (models.User, error)
-	UpdateUsername(userId int, input models.UpdateUsernameInput) error
-	UpdatePassword(userId int, input models.UpdatePasswordInput) error
+	UpdateUsername(userId int, oldUsername, newUsername string) error
+	UpdatePassword(userId int, username, oldPassword, newPassword string) error
 	Delete(userId int) error
 }
 
@@ -61,10 +61,8 @@ type Service struct {
 }
 
 func NewService(repos *repository.Repository, logger *slog.Logger) *Service {
-	authService := NewAuthService(*repos, logger)
-
 	return &Service{
-		Auth:   authService,
+		Auth:   NewAuthService(repos.Auth, logger),
 		User:   NewUserService(repos.User, logger),
 		Flower: NewFlowerService(repos.Flower, logger),
 		Order:  NewOrderService(repos.Order, logger),

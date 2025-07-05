@@ -8,13 +8,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// DTO для отправки клиенту данных пользователя
+type UserResponse struct {
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+// DTO для смены имени пользователя
+type UpdateUsernameRequest struct {
+	OldUsername string `json:"oldUsername" binding:"required" validate:"required,min=3,max=50"` // Старое имя пользователя
+	NewUsername string `json:"newUsername" binding:"required" validate:"required,min=3,max=50"` // Новое имя пользователя
+}
+
+// DTO для смены пароля
+type UpdatePasswordRequest struct {
+	Username    string `json:"username" binding:"required" validate:"required,min=3,max=50"` // Имя пользователя
+	OldPassword string `json:"oldPassword" binding:"required" validate:"required,min=8"`     // Старый пароль пользователя
+	NewPassword string `json:"newPassword" binding:"required" validate:"required,min=8"`     // Новый пароль пользователя
+}
+
 // GetAllUsers godoc
 // @Summary Get all users
 // @Description Retrieve a list of all users
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.User "OK"
+// @Success 200 {array} UserResponse "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
 // @Security BearerAuth
@@ -32,7 +52,12 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	var res []UserResponse
+	for _, user := range users {
+		res = append(res, toUserResponse(user))
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 // GetUserById godoc
@@ -42,7 +67,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "User ID"
-// @Success 200 {object} models.User "OK"
+// @Success 200 {object} UserResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -67,7 +92,7 @@ func (h *Handler) getUserById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, toUserResponse(user))
 }
 
 // UpdateUserUsername godoc
@@ -77,7 +102,7 @@ func (h *Handler) getUserById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "User ID"
-// @Param input body models.UpdateUsernameInput true "Update Username Input"
+// @Param input body UpdateUsernameRequest true "Update Username Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -97,20 +122,23 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdateUsernameInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdateUsernameRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.User.UpdateUsername(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdateUsername(id, req.OldUsername, req.NewUsername); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // UpdateUserPassword godoc
@@ -120,7 +148,7 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "User ID"
-// @Param input body models.UpdatePasswordInput true "Update Password Input"
+// @Param input body UpdatePasswordRequest true "Update Password Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -140,20 +168,23 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdatePasswordInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdatePasswordRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.User.UpdatePassword(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.User.UpdatePassword(id, req.Username, req.OldPassword, req.NewPassword); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // DeleteUser godoc
@@ -195,7 +226,7 @@ func (h *Handler) deleteUser(c *gin.Context) {
 // @Description Get info about the currently authenticated user
 // @Tags users
 // @Produce json
-// @Success 200 {object} models.User "OK"
+// @Success 200 {object} UserResponse "OK"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
 // @Security BearerAuth
@@ -206,10 +237,20 @@ func (h *Handler) getMe(c *gin.Context) {
 		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
+
 	user, err := h.services.User.GetById(userId)
 	if err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	c.JSON(http.StatusOK, toUserResponse(user))
+}
+
+func toUserResponse(user models.User) UserResponse {
+	return UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Email:    user.Email,
+	}
 }
