@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -19,41 +20,41 @@ func NewUserPostgres(db *sqlx.DB, logger *slog.Logger) *UserPostgres {
 	return &UserPostgres{db: db, logger: logger}
 }
 
-func (r *UserPostgres) GetAll() ([]models.User, error) {
+func (r *UserPostgres) GetAll(ctx context.Context) ([]models.User, error) {
 	var users []models.User
 	query := "SELECT id, username, email, password FROM users"
 
-	err := r.db.Select(&users, query)
+	err := r.db.SelectContext(ctx, &users, query)
 
 	if len(users) == 0 {
-		return nil, sql.ErrNoRows
+		return nil, err
 	}
 
 	return users, err
 }
 
-func (r *UserPostgres) GetById(userId int) (models.User, error) {
+func (r *UserPostgres) GetById(ctx context.Context, userId int) (models.User, error) {
 	var user models.User
 	query := "SELECT id, username, email, password FROM users WHERE id=$1"
 
-	err := r.db.Get(&user, query, userId)
+	err := r.db.GetContext(ctx, &user, query, userId)
 
 	return user, err
 }
 
-func (r *UserPostgres) Delete(userId int) error {
+func (r *UserPostgres) Delete(ctx context.Context, userId int) error {
 	query := "DELETE FROM users WHERE id=$1"
 
-	_, err := r.db.Exec(query, userId)
+	_, err := r.db.ExecContext(ctx, query, userId)
 
 	return err
 }
 
-func (r *UserPostgres) UpdateUsername(userId int, oldUsername, newUsername string) error {
+func (r *UserPostgres) UpdateUsername(ctx context.Context, userId int, oldUsername, newUsername string) error {
 	var currentUsername string
 	selectQuery := "SELECT username FROM users WHERE id=$1"
 
-	if err := r.db.QueryRow(selectQuery, userId).Scan(&currentUsername); err != nil {
+	if err := r.db.QueryRowContext(ctx, selectQuery, userId).Scan(&currentUsername); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("user not found or credentials do not match")
 		}
@@ -70,7 +71,7 @@ func (r *UserPostgres) UpdateUsername(userId int, oldUsername, newUsername strin
 
 	updateQuery := "UPDATE users SET username=$1 WHERE id=$2"
 
-	if _, err := r.db.Exec(updateQuery, newUsername, userId); err != nil {
+	if _, err := r.db.ExecContext(ctx, updateQuery, newUsername, userId); err != nil {
 		return fmt.Errorf("failed to update username: %w", err)
 
 	}
@@ -78,11 +79,11 @@ func (r *UserPostgres) UpdateUsername(userId int, oldUsername, newUsername strin
 	return nil
 }
 
-func (r *UserPostgres) UpdatePassword(userId int, username, oldPassword, newPassword string) error {
+func (r *UserPostgres) UpdatePassword(ctx context.Context, userId int, username, oldPassword, newPassword string) error {
 	var currentHashedPassword string
 
 	selectQuery := "SELECT password FROM users WHERE id=$1 AND username=$2"
-	if err := r.db.QueryRow(selectQuery, userId, username).Scan(&currentHashedPassword); err != nil {
+	if err := r.db.QueryRowContext(ctx, selectQuery, userId, username).Scan(&currentHashedPassword); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("user not found or credentials do not match")
 		}
@@ -98,7 +99,7 @@ func (r *UserPostgres) UpdatePassword(userId int, username, oldPassword, newPass
 	}
 
 	updateQuery := "UPDATE users SET password=$1 WHERE id=$2"
-	if _, err := r.db.Exec(updateQuery, newPassword, userId); err != nil {
+	if _, err := r.db.ExecContext(ctx, updateQuery, newPassword, userId); err != nil {
 		return fmt.Errorf("failed to update password: %w", err)
 	}
 

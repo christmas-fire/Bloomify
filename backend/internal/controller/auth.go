@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -43,8 +44,17 @@ func (h *Handler) signUp(c *gin.Context) {
 		return
 	}
 
-	id, err := h.services.Auth.CreateUser(req.Username, req.Email, req.Password)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	id, err := h.services.Auth.CreateUser(ctx, req.Username, req.Email, req.Password)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -78,13 +88,22 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.services.Auth.GenerateToken(req.Username, req.Password)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	token, err := h.services.Auth.GenerateToken(ctx, req.Username, req.Password)
 	if err != nil {
 		if errors.Is(err, errors.New("invalid username or password")) {
 			newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		} else {
-			newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		}
+
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
+		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 

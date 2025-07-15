@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -18,11 +19,11 @@ func NewAuthPostgres(db *sqlx.DB, logger *slog.Logger) *AuthPostgres {
 	return &AuthPostgres{db: db, logger: logger}
 }
 
-func (r *AuthPostgres) CreateUser(username, email, password string) (int, error) {
+func (r *AuthPostgres) CreateUser(ctx context.Context, username, email, password string) (int, error) {
 	var id int
 	query := "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id"
 
-	row := r.db.QueryRow(query, username, email, password)
+	row := r.db.QueryRowxContext(ctx, query, username, email, password)
 	if err := row.Scan(&id); err != nil {
 		// Обрабатываем ошибку duplicate key value violates unique constraint "\field\"
 		if strings.Contains(err.Error(), "users_email_key") {
@@ -36,11 +37,11 @@ func (r *AuthPostgres) CreateUser(username, email, password string) (int, error)
 	return id, nil
 }
 
-func (r *AuthPostgres) GetUser(username, password string) (models.User, error) {
+func (r *AuthPostgres) GetUser(ctx context.Context, username, password string) (models.User, error) {
 	var user models.User
 	query := "SELECT * FROM users WHERE username=$1 AND password=$2"
 
-	err := r.db.Get(&user, query, username, password)
+	err := r.db.GetContext(ctx, &user, query, username, password)
 	if err != nil {
 		return user, err
 	}

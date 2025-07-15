@@ -213,7 +213,7 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Flower ID"
 // @Param input body UpdateNameRequest true "Update Flower Name Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -259,7 +259,7 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Flower ID"
 // @Param input body UpdateDescriptionRequest true "Update Flower Description Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -305,7 +305,7 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Flower ID"
 // @Param input body UpdatePriceRequest true "Update Flower Price Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -351,7 +351,7 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Flower ID"
 // @Param input body UpdateStockRequest true "Update Flower Stock Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"

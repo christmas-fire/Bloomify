@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -8,16 +9,16 @@ import (
 )
 
 type Auth interface {
-	CreateUser(username, email, password string) (int, error)
-	GetUser(username, password string) (models.User, error)
+	CreateUser(ctx context.Context, username, email, password string) (int, error)
+	GetUser(ctx context.Context, username, password string) (models.User, error)
 }
 
 type User interface {
-	GetAll() ([]models.User, error)
-	GetById(userId int) (models.User, error)
-	UpdateUsername(userId int, oldUsername, newUsername string) error
-	UpdatePassword(userId int, username, oldPassword, newPassword string) error
-	Delete(userId int) error
+	GetAll(ctx context.Context) ([]models.User, error)
+	GetById(ctx context.Context, userId int) (models.User, error)
+	UpdateUsername(ctx context.Context, userId int, oldUsername, newUsername string) error
+	UpdatePassword(ctx context.Context, userId int, username, oldPassword, newPassword string) error
+	Delete(ctx context.Context, userId int) error
 }
 
 type Flower interface {

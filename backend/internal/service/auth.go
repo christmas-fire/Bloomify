@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -32,10 +33,10 @@ func NewAuthService(repo repository.Auth, logger *slog.Logger) *AuthService {
 	return &AuthService{repo: repo, logger: logger}
 }
 
-func (s *AuthService) CreateUser(username, email, password string) (int, error) {
+func (s *AuthService) CreateUser(ctx context.Context, username, email, password string) (int, error) {
 	passwordHash := generatePasswordHash(password)
 
-	return s.repo.CreateUser(username, email, passwordHash)
+	return s.repo.CreateUser(ctx, username, email, passwordHash)
 }
 
 func (s *AuthService) generateToken(userId int) (string, error) {
@@ -57,10 +58,10 @@ func (s *AuthService) generateToken(userId int) (string, error) {
 	return signedToken, nil
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GetUser(username, generatePasswordHash(password))
+func (s *AuthService) GenerateToken(ctx context.Context, username, password string) (string, error) {
+	user, err := s.repo.GetUser(ctx, username, generatePasswordHash(password))
 	if err != nil {
-		return "", errors.New("invalid username or password")
+		return "", err
 	}
 
 	return s.generateToken(user.Id)

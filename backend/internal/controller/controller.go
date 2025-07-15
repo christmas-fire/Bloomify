@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/service"
@@ -16,6 +17,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 )
+
+const defaultTimeout = 500 * time.Millisecond
 
 type Handler struct {
 	services  *service.Service

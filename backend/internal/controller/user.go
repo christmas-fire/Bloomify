@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/gin-gonic/gin"
@@ -56,8 +58,17 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.services.User.GetAll()
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	users, err := h.services.User.GetAll(ctx)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -100,10 +111,19 @@ func (h *Handler) getUserById(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.User.GetById(id)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	user, err := h.services.User.GetById(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
 			return
 		}
 
@@ -122,7 +142,7 @@ func (h *Handler) getUserById(c *gin.Context) {
 // @Produce json
 // @Param id path int true "User ID"
 // @Param input body UpdateUsernameRequest true "Update Username Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -152,7 +172,16 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.User.UpdateUsername(id, req.OldUsername, req.NewUsername); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.User.UpdateUsername(ctx, id, req.OldUsername, req.NewUsername); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -168,7 +197,7 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 // @Produce json
 // @Param id path int true "User ID"
 // @Param input body UpdatePasswordRequest true "Update Password Input"
-// @Success 200 {object} statusResponse "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 500 {object} map[string]string "Internal Server Error"
@@ -198,7 +227,16 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.User.UpdatePassword(id, req.Username, req.OldPassword, req.NewPassword); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.User.UpdatePassword(ctx, id, req.Username, req.OldPassword, req.NewPassword); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -232,7 +270,16 @@ func (h *Handler) deleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.User.Delete(id); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.User.Delete(ctx, id); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -257,8 +304,19 @@ func (h *Handler) getMe(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.User.GetById(userId)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	time.Sleep(1 * time.Second)
+
+	user, err := h.services.User.GetById(ctx, userId)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
