@@ -32,28 +32,10 @@ type Flower interface {
 	Delete(flowerId int) error
 }
 
-type Order interface {
-	CreateOrder(userId int, order_flowers models.OrderFlowers) (int, error)
-	GetAll() ([]models.Order, error)
-	GetById(orderId int) (models.Order, error)
-	GetOrdersByUserId(userId string) ([]models.Order, error)
-	GetAllOrderFlowers() ([]models.OrderFlowers, error)
-	GetOrderFlowersByOrderId(orderFlowersId int) ([]models.OrderFlowers, error)
-	UpdateOrder(orderId int, input models.UpdateOrderInput) error
-	UpdateOrderFlowerId(orderId int, input models.UpdateOrderFlowerIdInput) error
-	UpdateOrderQuantity(orderId int, input models.UpdateOrderQuantityInput) error
-	Delete(orderId int) error
-	RemoveFlowerFromOrder(userId int, flowerId int) error
-	IncrementFlowerQuantity(userId int, flowerId int) error
-	DecrementFlowerQuantity(userId int, flowerId int) error
-	DeleteActiveOrder(userId int) error
-}
-
 type Service struct {
 	Auth
 	User
 	Flower
-	Order
 }
 
 func NewService(repos *repository.Repository, logger *slog.Logger) *Service {
@@ -61,6 +43,5 @@ func NewService(repos *repository.Repository, logger *slog.Logger) *Service {
 		Auth:   NewAuthService(repos.Auth, logger),
 		User:   NewUserService(repos.User, logger),
 		Flower: NewFlowerService(repos.Flower, logger),
-		Order:  NewOrderService(repos.Order, logger),
 	}
 }

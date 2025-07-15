@@ -27,29 +27,10 @@ const (
 			price NUMERIC NOT NULL,
 			stock INT NOT NULL
 		)`
-
-	SchemaOrders = `
-		CREATE TABLE IF NOT EXISTS orders (
-			id SERIAL PRIMARY KEY,
-			user_id INT NOT NULL,
-			order_date TIMESTAMP DEFAULT NOW(),
-			total_price NUMERIC NOT NULL,
-			FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-		)`
-
-	SchemaOrderFlowers = `
-		CREATE TABLE IF NOT EXISTS order_flowers (
-			order_id INT NOT NULL,
-			flower_id INT NOT NULL,
-			quantity INT NOT NULL,
-			PRIMARY KEY (order_id, flower_id),
-			FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
-			FOREIGN KEY (flower_id) REFERENCES flowers (id) ON DELETE CASCADE
-		)`
 )
 
 // Схемы для инициализации базы данных
-var schemas = []string{SchemaUsers, SchemaFlowers, SchemaOrders, SchemaOrderFlowers}
+var schemas = []string{SchemaUsers, SchemaFlowers}
 
 // Инициализация Postgres
 func InitPostgres() (*sqlx.DB, error) {
