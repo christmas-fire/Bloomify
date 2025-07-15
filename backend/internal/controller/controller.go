@@ -6,6 +6,7 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
@@ -17,13 +18,19 @@ import (
 )
 
 type Handler struct {
-	services *service.Service
-	logger   *slog.Logger
-	metrics  *metrics.Metrics
+	services  *service.Service
+	validator *validator.Validate
+	logger    *slog.Logger
+	metrics   *metrics.Metrics
 }
 
-func NewHandler(services *service.Service, logger *slog.Logger, metrics *metrics.Metrics) *Handler {
-	return &Handler{services: services, logger: logger, metrics: metrics}
+func NewHandler(services *service.Service, validator *validator.Validate, logger *slog.Logger, metrics *metrics.Metrics) *Handler {
+	return &Handler{
+		services:  services,
+		validator: validator,
+		logger:    logger,
+		metrics:   metrics,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
@@ -42,7 +49,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		AllowCredentials: true,
 	}))
 
-	// Глобальный обработчик OPTIONS для всех путей
 	router.OPTIONS("/*path", func(c *gin.Context) {
 		c.Status(204)
 	})
@@ -74,39 +80,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			flowers := v1.Group("/flowers")
 			{
 				flowers.POST("/", h.createFlower)
-				flowers.GET("/", h.getAllFlowers)
+				flowers.GET("/", h.getFlowers)
 				flowers.GET("/:id", h.getFlowerById)
-				flowers.GET("/name", h.getFlowersByName)
-				flowers.GET("/description", h.getFlowersByDescription)
-				flowers.GET("/price", h.getFlowersByPrice)
-				flowers.GET("/stock", h.getFlowersByStock)
 				flowers.PATCH("/:id/name", h.updateFlowerName)
 				flowers.PATCH("/:id/description", h.updateFlowerDescription)
 				flowers.PATCH("/:id/price", h.updateFlowerPrice)
 				flowers.PATCH("/:id/stock", h.updateFlowerStock)
 				flowers.DELETE("/:id", h.deleteFlower)
-			}
-
-			orders := v1.Group("/orders")
-			{
-				orders.POST("/", h.createOrder)
-				orders.GET("/", h.getAllOrders)
-				orders.GET("/:id", h.getOrderById)
-				orders.GET("/user_id", h.getOrdersByUserId)
-				orders.PUT("/:id", h.updateOrder)
-				orders.PATCH("/:id/flower_id", h.updateOrderFlowerId)
-				orders.PATCH("/:id/quantity", h.updateOrderQuantity)
-				orders.DELETE("/:id", h.deleteOrder)
-				orders.DELETE("/flower/:flower_id/", h.removeFlowerFromOrder)
-				orders.PATCH("/flower/:flower_id/increment/", h.incrementFlowerQuantity)
-				orders.PATCH("/flower/:flower_id/decrement/", h.decrementFlowerQuantity)
-				orders.DELETE("/active", h.deleteActiveOrder)
-			}
-
-			order_flowers := v1.Group("/order_flowers")
-			{
-				order_flowers.GET("/", h.getAllOrderFlowers)
-				order_flowers.GET("/:id", h.getOrderFlowersByOrderId)
 			}
 		}
 	}

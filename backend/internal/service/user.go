@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -29,36 +28,13 @@ func (s *UserService) Delete(userId int) error {
 	return s.repo.Delete(userId)
 }
 
-func (s *UserService) UpdateUsername(userId int, input models.UpdateUsernameInput) error {
-	if err := validateUsername(input.NewUsername); err != nil {
-		return err
-	}
-	return s.repo.UpdateUsername(userId, input)
+func (s *UserService) UpdateUsername(userId int, oldUsername, newUsername string) error {
+	return s.repo.UpdateUsername(userId, oldUsername, newUsername)
 }
 
-func (s *UserService) UpdatePassword(userId int, input models.UpdatePasswordInput) error {
-	if err := validatePassword(input.NewPassword); err != nil {
-		return err
-	}
+func (s *UserService) UpdatePassword(userId int, username, oldPassword, newPassword string) error {
+	oldPasswordHash := generatePasswordHash(oldPassword)
+	newPasswordHash := generatePasswordHash(newPassword)
 
-	input.OldPassword = generatePasswordHash(input.OldPassword)
-	input.NewPassword = generatePasswordHash(input.NewPassword)
-
-	return s.repo.UpdatePassword(userId, input)
-}
-
-func validateUsername(username string) error {
-	if len(username) < 3 {
-		return fmt.Errorf("username must have at least 3 characters")
-	}
-
-	return nil
-}
-
-func validatePassword(password string) error {
-	if len(password) < 8 {
-		return fmt.Errorf("password must have at least 8 characters")
-	}
-
-	return nil
+	return s.repo.UpdatePassword(userId, username, oldPasswordHash, newPasswordHash)
 }

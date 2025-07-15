@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -26,21 +24,18 @@ type customClaims struct {
 }
 
 type AuthService struct {
-	repo   repository.Repository
+	repo   repository.Auth
 	logger *slog.Logger
 }
 
-func NewAuthService(repo repository.Repository, logger *slog.Logger) *AuthService {
+func NewAuthService(repo repository.Auth, logger *slog.Logger) *AuthService {
 	return &AuthService{repo: repo, logger: logger}
 }
 
-func (s *AuthService) CreateUser(user models.User) (int, error) {
-	if err := validateUser(user); err != nil {
-		return 0, err
-	}
-	user.Password = generatePasswordHash(user.Password)
+func (s *AuthService) CreateUser(username, email, password string) (int, error) {
+	passwordHash := generatePasswordHash(password)
 
-	return s.repo.Auth.CreateUser(user)
+	return s.repo.CreateUser(username, email, passwordHash)
 }
 
 func (s *AuthService) generateToken(userId int) (string, error) {
@@ -63,7 +58,7 @@ func (s *AuthService) generateToken(userId int) (string, error) {
 }
 
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.Auth.GetUser(username, generatePasswordHash(password))
+	user, err := s.repo.GetUser(username, generatePasswordHash(password))
 	if err != nil {
 		return "", errors.New("invalid username or password")
 	}
@@ -97,20 +92,4 @@ func generatePasswordHash(password string) string {
 	hash.Write([]byte(password))
 
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
-}
-
-func validateUser(u models.User) error {
-	if len(u.Username) < 3 {
-		return fmt.Errorf("username must have at least 3 characters")
-	}
-
-	if len(u.Password) < 8 {
-		return fmt.Errorf("password must have at least 8 characters")
-	}
-
-	if !strings.Contains(u.Email, "@") {
-		return fmt.Errorf("invalid email format")
-	}
-
-	return nil
 }

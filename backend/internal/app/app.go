@@ -16,6 +16,7 @@ import (
 	"github.com/christmas-fire/Bloomify/internal/metrics"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/christmas-fire/Bloomify/internal/service"
+	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -44,10 +45,11 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	validator := validator.New()
 	metrics := metrics.NewMetrics()
 	repository := repository.NewRepository(db, logger)
 	service := service.NewService(repository, logger)
-	handler := controller.NewHandler(service, logger, metrics)
+	handler := controller.NewHandler(service, validator, logger, metrics)
 
 	server := &http.Server{
 		Addr:    ":" + os.Getenv("BACKEND_PORT"),
