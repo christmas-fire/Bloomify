@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -26,6 +28,14 @@ type UpdatePasswordRequest struct {
 	Username    string `json:"username" binding:"required" validate:"required,min=3,max=50"` // Имя пользователя
 	OldPassword string `json:"oldPassword" binding:"required" validate:"required,min=8"`     // Старый пароль пользователя
 	NewPassword string `json:"newPassword" binding:"required" validate:"required,min=8"`     // Новый пароль пользователя
+}
+
+func toUserResponse(user models.User) UserResponse {
+	return UserResponse{
+		Id:       user.Id,
+		Username: user.Username,
+		Email:    user.Email,
+	}
 }
 
 // GetAllUsers godoc
@@ -55,6 +65,10 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 	var res []UserResponse
 	for _, user := range users {
 		res = append(res, toUserResponse(user))
+	}
+
+	if res == nil {
+		res = []UserResponse{}
 	}
 
 	c.JSON(http.StatusOK, res)
@@ -88,6 +102,11 @@ func (h *Handler) getUserById(c *gin.Context) {
 
 	user, err := h.services.User.GetById(id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -245,12 +264,4 @@ func (h *Handler) getMe(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, toUserResponse(user))
-}
-
-func toUserResponse(user models.User) UserResponse {
-	return UserResponse{
-		Id:       user.Id,
-		Username: user.Username,
-		Email:    user.Email,
-	}
 }

@@ -2,12 +2,61 @@ package controller
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
+	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
 )
+
+// DTO для отправки клиенту данных цветка
+type FlowerResponse struct {
+	Id          int     `json:"id"`          // ID цветка
+	Name        string  `json:"name"`        // Название
+	Description string  `json:"description"` // Описание
+	Price       float64 `json:"price"`       // Цена
+	Stock       int     `json:"stock"`       // Кол-во в наличии
+}
+
+// DTO для создания цветка
+type CreateFlowerRequest struct {
+	Name        string  `json:"name" binding:"required" validate:"required,min=3,max=50"` // Название
+	Description string  `json:"description" validate:"max=1024"`                          // Описание (опционально)
+	Price       float64 `json:"price" binding:"required" validate:"required,gt=0"`        // Цена
+	Stock       int     `json:"stock" binding:"required" validate:"required,gte=0"`       // Кол-во в наличии
+}
+
+// DTO для обновления имени цветка
+type UpdateNameRequest struct {
+	NewName string `json:"newName" binding:"required" validate:"required,min=3,max=50"` // Новое название
+}
+
+// DTO для обновления описания цветка
+type UpdateDescriptionRequest struct {
+	NewDescription string `json:"newDescription" binding:"required" validate:"required,max=1024"` // Новое описание
+}
+
+// DTO для обновления цены цветка
+type UpdatePriceRequest struct {
+	NewPrice float64 `json:"newPrice" binding:"required" validate:"required,gt=0"` // Новая цена
+}
+
+// DTO для обновления количества цветка в наличии
+type UpdateStockRequest struct {
+	NewStock int `json:"newStock" binding:"required" validate:"required,gte=0"` // Новое количество в наличии
+}
+
+func toFlowerResponse(flower models.Flower) FlowerResponse {
+	return FlowerResponse{
+		Id:          flower.Id,
+		Name:        flower.Name,
+		Description: flower.Description,
+		Price:       flower.Price,
+		Stock:       flower.Stock,
+	}
+}
 
 // CreateFlower godoc
 // @Summary Create a new flower
@@ -15,7 +64,7 @@ import (
 // @Tags flowers
 // @Accept json
 // @Produce json
-// @Param flower body models.Flower true "Flower data"
+// @Param flower body CreateFlowerRequest true "Flower data"
 // @Success 201 {object} map[string]int "Created"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -29,13 +78,18 @@ func (h *Handler) createFlower(c *gin.Context) {
 		return
 	}
 
-	var input models.Flower
-	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+	var req CreateFlowerRequest
+	if err := c.BindJSON(&req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	id, err := h.services.Flower.CreateFlower(input)
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, err := h.services.Flower.CreateFlower(req.Name, req.Description, req.Price, req.Stock)
 	if err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
@@ -46,35 +100,68 @@ func (h *Handler) createFlower(c *gin.Context) {
 	})
 }
 
-// GetAllFlowers godoc
-// @Summary Get all flowers
-// @Description Retrieve a list of all flowers
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Success 200 {array} models.Flower "OK"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers [get]
-func (h *Handler) getAllFlowers(c *gin.Context) {
+// getFlowers godoc
+// @Summary      Get a list of flowers with optional filters
+// @Description  Retrieve a list of all flowers. Can be filtered by `name`, `description`, `max_price`, and `max_stock`. All filters are combined with AND logic.
+// @Tags         flowers
+// @Accept       json
+// @Produce      json
+// @Param        name        query string  false "Filter by flower name (case-insensitive, partial match)"
+// @Param        description query string  false "Filter by description (case-insensitive, partial match)"
+// @Param        max_price   query number  false "Filter by maximum price (inclusive)"
+// @Param        max_stock   query integer false "Filter by maximum stock (inclusive)"
+// @Success      200 {array} FlowerResponse "OK"
+// @Failure      400 {object} map[string]string "Bad Request (e.g., invalid number format for price/stock)"
+// @Failure      401 {object} map[string]string "Unauthorized"
+// @Failure      500 {object} map[string]string "Internal Server Error"
+// @Security     BearerAuth
+// @Router       /api/v1/flowers [get]
+func (h *Handler) getFlowers(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
 		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	flowers, err := h.services.Flower.GetAll()
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusOK, []models.Flower{})
+	var filter service.FlowerFilter
+
+	filter.Name = c.Query("name")
+	filter.Description = c.Query("description")
+
+	if priceStr := c.Query("max_price"); priceStr != "" {
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid max_price format")
+			return
+		}
+		filter.MaxPrice = &price
 	}
 
+	if stockStr := c.Query("max_stock"); stockStr != "" {
+		stock, err := strconv.Atoi(stockStr)
+		if err != nil {
+			newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid max_stock format")
+			return
+		}
+		filter.MaxStock = &stock
+	}
+
+	flowers, err := h.services.Flower.Get(filter)
 	if err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, flowers)
+	var res []FlowerResponse
+	for _, flower := range flowers {
+		res = append(res, toFlowerResponse(flower))
+	}
+
+	if res == nil {
+		res = []FlowerResponse{}
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 // GetFlowerById godoc
@@ -84,9 +171,10 @@ func (h *Handler) getAllFlowers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Success 200 {object} models.Flower "OK"
+// @Success 200 {object} FlowerResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Not found"
 // @Failure 500 {object} map[string]string "Internal Server Error"
 // @Security BearerAuth
 // @Router /api/v1/flowers/{id} [get]
@@ -103,169 +191,18 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Flower.GetById(id)
+	flower, err := h.services.Flower.GetById(id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Flower not found"})
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
-}
-
-// GetFlowersByName godoc
-// @Summary Search flowers by name
-// @Description Retrieve a list of flowers by their name
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param name query string true "Flower Name"
-// @Success 200 {array} models.Flower "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/name [get]
-func (h *Handler) getFlowersByName(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	name := c.Query("name")
-	if name == "" {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "not found query param")
-		return
-	}
-
-	flowers, err := h.services.Flower.GetFlowersByName(name)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusOK, []models.Flower{})
-		return
-	}
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, flowers)
-}
-
-// GetFlowersByDescription godoc
-// @Summary Search flowers by description
-// @Description Retrieve a list of flowers by their description
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param description query string true "Flower Description"
-// @Success 200 {array} models.Flower "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/description [get]
-func (h *Handler) getFlowersByDescription(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	description := c.Query("description")
-	if description == "" {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "not found query param")
-		return
-	}
-
-	flowers, err := h.services.Flower.GetFlowersByDescription(description)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusOK, []models.Flower{})
-		return
-	}
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, flowers)
-}
-
-// GetFlowersByPrice godoc
-// @Summary Search flowers by price
-// @Description Retrieve a list of flowers with prices less than or equal to the specified value
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param price query string true "Max Price"
-// @Success 200 {array} models.Flower "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/price [get]
-func (h *Handler) getFlowersByPrice(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	price := c.Query("price")
-	if price == "" {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "not found query param")
-		return
-	}
-
-	flowers, err := h.services.Flower.GetFlowersByPrice(price)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusOK, []models.Flower{})
-		return
-	}
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, flowers)
-}
-
-// GetFlowersByStock godoc
-// @Summary Search flowers by stock
-// @Description Retrieve a list of flowers with stock levels less than or equal to the specified value
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param stock query string true "Max Stock"
-// @Success 200 {array} models.Flower "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/stock [get]
-func (h *Handler) getFlowersByStock(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		return
-	}
-
-	stock := c.Query("stock")
-	if stock == "" {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "not found query param")
-		return
-	}
-
-	flowers, err := h.services.Flower.GetFlowersByStock(stock)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusOK, []models.Flower{})
-		return
-	}
-	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, flowers)
+	c.JSON(http.StatusOK, toFlowerResponse(flower))
 }
 
 // UpdateFlowerName godoc
@@ -275,7 +212,7 @@ func (h *Handler) getFlowersByStock(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Param input body models.UpdateNameInput true "Update Flower Name Input"
+// @Param input body UpdateNameRequest true "Update Flower Name Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -295,20 +232,23 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdateNameInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdateNameRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.Flower.UpdateName(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateName(id, req.NewName); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // UpdateFlowerDescription godoc
@@ -318,7 +258,7 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Param input body models.UpdateDescriptionInput true "Update Flower Description Input"
+// @Param input body UpdateDescriptionRequest true "Update Flower Description Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -338,20 +278,23 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdateDescriptionInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdateDescriptionRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.Flower.UpdateDescription(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateDescription(id, req.NewDescription); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // UpdateFlowerPrice godoc
@@ -361,7 +304,7 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Param input body models.UpdatePriceInput true "Update Flower Price Input"
+// @Param input body UpdatePriceRequest true "Update Flower Price Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -381,20 +324,23 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdatePriceInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdatePriceRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.Flower.UpdatePrice(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdatePrice(id, req.NewPrice); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // UpdateFlowerStock godoc
@@ -404,7 +350,7 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Param input body models.UpdateStockInput true "Update Flower Stock Input"
+// @Param input body UpdateStockRequest true "Update Flower Stock Input"
 // @Success 200 {object} statusResponse "OK"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
@@ -424,20 +370,23 @@ func (h *Handler) updateFlowerStock(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdateStockInput
-	if err := c.BindJSON(&input); err != nil {
+	var req UpdateStockRequest
+	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := h.services.Flower.UpdateStock(id, input); err != nil {
+	if err := h.validator.Struct(req); err != nil {
+		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.services.Flower.UpdateStock(id, req.NewStock); err != nil {
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, statusResponse{
-		Status: "ok",
-	})
+	c.Status(http.StatusNoContent)
 }
 
 // DeleteFlower godoc

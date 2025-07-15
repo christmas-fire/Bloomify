@@ -49,7 +49,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		AllowCredentials: true,
 	}))
 
-	// Глобальный обработчик OPTIONS для всех путей
 	router.OPTIONS("/*path", func(c *gin.Context) {
 		c.Status(204)
 	})
@@ -81,12 +80,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			flowers := v1.Group("/flowers")
 			{
 				flowers.POST("/", h.createFlower)
-				flowers.GET("/", h.getAllFlowers)
+				flowers.GET("/", h.getFlowers)
 				flowers.GET("/:id", h.getFlowerById)
-				flowers.GET("/name", h.getFlowersByName)
-				flowers.GET("/description", h.getFlowersByDescription)
-				flowers.GET("/price", h.getFlowersByPrice)
-				flowers.GET("/stock", h.getFlowersByStock)
 				flowers.PATCH("/:id/name", h.updateFlowerName)
 				flowers.PATCH("/:id/description", h.updateFlowerDescription)
 				flowers.PATCH("/:id/price", h.updateFlowerPrice)

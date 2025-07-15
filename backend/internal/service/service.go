@@ -14,7 +14,7 @@ type Auth interface {
 }
 
 type User interface {
-	GetAll() ([]models.User, error) // возвращать отдельно каждое поле а потом маппить с DTO response
+	GetAll() ([]models.User, error)
 	GetById(userId int) (models.User, error)
 	UpdateUsername(userId int, oldUsername, newUsername string) error
 	UpdatePassword(userId int, username, oldPassword, newPassword string) error
@@ -22,17 +22,13 @@ type User interface {
 }
 
 type Flower interface {
-	CreateFlower(flower models.Flower) (int, error)
-	GetAll() ([]models.Flower, error)
+	CreateFlower(name, description string, price float64, stock int) (int, error)
+	Get(filter FlowerFilter) ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
-	GetFlowersByName(name string) ([]models.Flower, error)
-	GetFlowersByDescription(description string) ([]models.Flower, error)
-	GetFlowersByPrice(price string) ([]models.Flower, error)
-	GetFlowersByStock(stock string) ([]models.Flower, error)
-	UpdateName(flowerId int, input models.UpdateNameInput) error
-	UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error
-	UpdatePrice(flowerId int, input models.UpdatePriceInput) error
-	UpdateStock(flowerId int, input models.UpdateStockInput) error
+	UpdateName(flowerId int, newName string) error
+	UpdateDescription(flowerId int, newDescription string) error
+	UpdatePrice(flowerId int, newPrice float64) error
+	UpdateStock(flowerId int, newStock int) error
 	Delete(flowerId int) error
 }
 

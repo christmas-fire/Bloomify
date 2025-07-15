@@ -21,17 +21,13 @@ type User interface {
 }
 
 type Flower interface {
-	CreateFlower(flower models.Flower) (int, error)
-	GetAll() ([]models.Flower, error)
+	CreateFlower(name, description string, price float64, stock int) (int, error)
+	Get(filter FlowerFilter) ([]models.Flower, error)
 	GetById(flowerId int) (models.Flower, error)
-	GetFlowersByName(name string) ([]models.Flower, error)
-	GetFlowersByDescription(description string) ([]models.Flower, error)
-	GetFlowersByPrice(price float64) ([]models.Flower, error)
-	GetFlowersByStock(stock int64) ([]models.Flower, error)
-	UpdateName(flowerId int, input models.UpdateNameInput) error
-	UpdateDescription(flowerId int, input models.UpdateDescriptionInput) error
-	UpdatePrice(flowerId int, input models.UpdatePriceInput) error
-	UpdateStock(flowerId int, input models.UpdateStockInput) error
+	UpdateName(flowerId int, newName string) error
+	UpdateDescription(flowerId int, newDescription string) error
+	UpdatePrice(flowerId int, newPrice float64) error
+	UpdateStock(flowerId int, newStock int) error
 	Delete(flowerId int) error
 }
 

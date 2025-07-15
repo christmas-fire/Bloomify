@@ -5,13 +5,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// Metrics структура для хранения метрик Prometheus
+// Метрики для Prometheus
 type Metrics struct {
 	HttpRequestsTotal   *prometheus.CounterVec
 	HttpRequestsLatency *prometheus.HistogramVec
 }
 
-// NewMetrics создает и регистрирует метрики
 func NewMetrics() *Metrics {
 	return &Metrics{
 		HttpRequestsTotal: promauto.NewCounterVec(
