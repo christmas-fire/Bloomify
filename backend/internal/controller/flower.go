@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -89,8 +90,17 @@ func (h *Handler) createFlower(c *gin.Context) {
 		return
 	}
 
-	id, err := h.services.Flower.CreateFlower(req.Name, req.Description, req.Price, req.Stock)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	id, err := h.services.Flower.CreateFlower(ctx, req.Name, req.Description, req.Price, req.Stock)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -146,8 +156,17 @@ func (h *Handler) getFlowers(c *gin.Context) {
 		filter.MaxStock = &stock
 	}
 
-	flowers, err := h.services.Flower.Get(filter)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	flowers, err := h.services.Flower.Get(ctx, filter)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -191,8 +210,17 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 		return
 	}
 
-	flower, err := h.services.Flower.GetById(id)
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	flower, err := h.services.Flower.GetById(ctx, id)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Flower not found"})
 			return
@@ -243,7 +271,16 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Flower.UpdateName(id, req.NewName); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.Flower.UpdateName(ctx, id, req.NewName); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -289,7 +326,16 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Flower.UpdateDescription(id, req.NewDescription); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.Flower.UpdateDescription(ctx, id, req.NewDescription); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -335,7 +381,16 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Flower.UpdatePrice(id, req.NewPrice); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.Flower.UpdatePrice(ctx, id, req.NewPrice); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -381,7 +436,16 @@ func (h *Handler) updateFlowerStock(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Flower.UpdateStock(id, req.NewStock); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.Flower.UpdateStock(ctx, id, req.NewStock); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -415,7 +479,16 @@ func (h *Handler) deleteFlower(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Flower.Delete(id); err != nil {
+	parentCtx := c.Request.Context()
+	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
+	defer cancel()
+
+	if err := h.services.Flower.Delete(ctx, id); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
+			return
+		}
+
 		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -23,14 +23,14 @@ type User interface {
 }
 
 type Flower interface {
-	CreateFlower(name, description string, price float64, stock int) (int, error)
-	Get(filter FlowerFilter) ([]models.Flower, error)
-	GetById(flowerId int) (models.Flower, error)
-	UpdateName(flowerId int, newName string) error
-	UpdateDescription(flowerId int, newDescription string) error
-	UpdatePrice(flowerId int, newPrice float64) error
-	UpdateStock(flowerId int, newStock int) error
-	Delete(flowerId int) error
+	CreateFlower(ctx context.Context, name, description string, price float64, stock int) (int, error)
+	Get(ctx context.Context, filter FlowerFilter) ([]models.Flower, error)
+	GetById(ctx context.Context, flowerId int) (models.Flower, error)
+	UpdateName(ctx context.Context, flowerId int, newName string) error
+	UpdateDescription(ctx context.Context, flowerId int, newDescription string) error
+	UpdatePrice(ctx context.Context, flowerId int, newPrice float64) error
+	UpdateStock(ctx context.Context, flowerId int, newStock int) error
+	Delete(ctx context.Context, flowerId int) error
 }
 
 type Service struct {

@@ -18,6 +18,7 @@ import (
 	"github.com/gin-contrib/cors"
 )
 
+// TODO: сделать адекватную обработку ошибок и проверять ошибки в контроллере уже на именнованные if (errors.Is(err, myCustomErr)) {}
 const defaultTimeout = 500 * time.Millisecond
 
 type Handler struct {

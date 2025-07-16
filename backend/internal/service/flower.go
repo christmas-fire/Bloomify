@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
@@ -24,40 +25,40 @@ func NewFlowerService(repo repository.Flower, logger *slog.Logger) *FlowerServic
 	return &FlowerService{repo: repo, logger: logger}
 }
 
-func (s *FlowerService) CreateFlower(name, description string, price float64, stock int) (int, error) {
-	return s.repo.CreateFlower(name, description, price, stock)
+func (s *FlowerService) CreateFlower(ctx context.Context, name, description string, price float64, stock int) (int, error) {
+	return s.repo.CreateFlower(ctx, name, description, price, stock)
 }
 
-func (s *FlowerService) Get(filter FlowerFilter) ([]models.Flower, error) {
+func (s *FlowerService) Get(ctx context.Context, filter FlowerFilter) ([]models.Flower, error) {
 	repoFilter := repository.FlowerFilter{
 		NameQuery:        filter.Name,
 		DescriptionQuery: filter.Description,
 		MaxPrice:         filter.MaxPrice,
 		MaxStock:         filter.MaxStock,
 	}
-	return s.repo.Get(repoFilter)
+	return s.repo.Get(ctx, repoFilter)
 }
 
-func (s *FlowerService) GetById(flowerId int) (models.Flower, error) {
-	return s.repo.GetById(flowerId)
+func (s *FlowerService) GetById(ctx context.Context, flowerId int) (models.Flower, error) {
+	return s.repo.GetById(ctx, flowerId)
 }
 
-func (s *FlowerService) Delete(flowerId int) error {
-	return s.repo.Delete(flowerId)
+func (s *FlowerService) Delete(ctx context.Context, flowerId int) error {
+	return s.repo.Delete(ctx, flowerId)
 }
 
-func (s *FlowerService) UpdateName(flowerId int, newName string) error {
-	return s.repo.UpdateName(flowerId, newName)
+func (s *FlowerService) UpdateName(ctx context.Context, flowerId int, newName string) error {
+	return s.repo.UpdateName(ctx, flowerId, newName)
 }
 
-func (s *FlowerService) UpdateDescription(flowerId int, newDescription string) error {
-	return s.repo.UpdateDescription(flowerId, newDescription)
+func (s *FlowerService) UpdateDescription(ctx context.Context, flowerId int, newDescription string) error {
+	return s.repo.UpdateDescription(ctx, flowerId, newDescription)
 }
 
-func (s *FlowerService) UpdatePrice(flowerId int, newPrice float64) error {
-	return s.repo.UpdatePrice(flowerId, newPrice)
+func (s *FlowerService) UpdatePrice(ctx context.Context, flowerId int, newPrice float64) error {
+	return s.repo.UpdatePrice(ctx, flowerId, newPrice)
 }
 
-func (s *FlowerService) UpdateStock(flowerId int, newStock int) error {
-	return s.repo.UpdateStock(flowerId, newStock)
+func (s *FlowerService) UpdateStock(ctx context.Context, flowerId int, newStock int) error {
+	return s.repo.UpdateStock(ctx, flowerId, newStock)
 }

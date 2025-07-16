@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -28,11 +29,11 @@ func NewFlowerPostgres(db *sqlx.DB, logger *slog.Logger) *FlowerPostgres {
 	return &FlowerPostgres{db: db, logger: logger}
 }
 
-func (r *FlowerPostgres) CreateFlower(name, description string, price float64, stock int) (int, error) {
+func (r *FlowerPostgres) CreateFlower(ctx context.Context, name, description string, price float64, stock int) (int, error) {
 	var id int
 	query := "INSERT INTO flowers (name, description, price, stock) VALUES ($1, $2, $3, $4) RETURNING id"
 
-	row := r.db.QueryRow(query, name, description, price, stock)
+	row := r.db.QueryRowxContext(ctx, query, name, description, price, stock)
 	if err := row.Scan(&id); err != nil {
 		// Обрабатываем ошибку duplicate key value violates unique constraint "\field\"
 		if strings.Contains(err.Error(), "flowers_name_key") {
@@ -45,7 +46,7 @@ func (r *FlowerPostgres) CreateFlower(name, description string, price float64, s
 	return id, nil
 }
 
-func (r *FlowerPostgres) Get(filter FlowerFilter) ([]models.Flower, error) {
+func (r *FlowerPostgres) Get(ctx context.Context, filter FlowerFilter) ([]models.Flower, error) {
 	query := "SELECT id, name, description, price, stock FROM flowers WHERE 1=1"
 	args := []interface{}{}
 	argId := 1
@@ -77,33 +78,33 @@ func (r *FlowerPostgres) Get(filter FlowerFilter) ([]models.Flower, error) {
 	query += " ORDER BY name ASC"
 
 	var flowers []models.Flower
-	err := r.db.Select(&flowers, query, args...)
+	err := r.db.SelectContext(ctx, &flowers, query, args...)
 
 	return flowers, err
 }
 
-func (r *FlowerPostgres) GetById(flowerId int) (models.Flower, error) {
+func (r *FlowerPostgres) GetById(ctx context.Context, flowerId int) (models.Flower, error) {
 	var flower models.Flower
 	query := "SELECT id, name, description, price, stock FROM flowers WHERE id=$1"
 
-	err := r.db.Get(&flower, query, flowerId)
+	err := r.db.GetContext(ctx, &flower, query, flowerId)
 
 	return flower, err
 }
 
-func (r *FlowerPostgres) Delete(flowerId int) error {
+func (r *FlowerPostgres) Delete(ctx context.Context, flowerId int) error {
 	query := "DELETE FROM flowers WHERE id=$1"
 
-	_, err := r.db.Exec(query, flowerId)
+	_, err := r.db.ExecContext(ctx, query, flowerId)
 
 	return err
 }
 
-func (r *FlowerPostgres) UpdateName(flowerId int, newName string) error {
+func (r *FlowerPostgres) UpdateName(ctx context.Context, flowerId int, newName string) error {
 	var currentName string
 	selectQuery := "SELECT name FROM flowers WHERE id=$1"
 
-	if err := r.db.QueryRow(selectQuery, flowerId).Scan(&currentName); err != nil {
+	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentName); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("flower not found")
 		}
@@ -115,16 +116,16 @@ func (r *FlowerPostgres) UpdateName(flowerId int, newName string) error {
 	}
 
 	query := "UPDATE flowers SET name=$1 WHERE id=$2"
-	_, err := r.db.Exec(query, newName, flowerId)
+	_, err := r.db.ExecContext(ctx, query, newName, flowerId)
 
 	return err
 }
 
-func (r *FlowerPostgres) UpdateDescription(flowerId int, newDescription string) error {
+func (r *FlowerPostgres) UpdateDescription(ctx context.Context, flowerId int, newDescription string) error {
 	var currentDescription string
 	selectQuery := "SELECT description FROM flowers WHERE id=$1"
 
-	if err := r.db.QueryRow(selectQuery, flowerId).Scan(&currentDescription); err != nil {
+	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentDescription); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("flower not found")
 		}
@@ -136,16 +137,16 @@ func (r *FlowerPostgres) UpdateDescription(flowerId int, newDescription string) 
 	}
 
 	query := "UPDATE flowers SET description=$1 WHERE id=$2"
-	_, err := r.db.Exec(query, newDescription, flowerId)
+	_, err := r.db.ExecContext(ctx, query, newDescription, flowerId)
 
 	return err
 }
 
-func (r *FlowerPostgres) UpdatePrice(flowerId int, newPrice float64) error {
+func (r *FlowerPostgres) UpdatePrice(ctx context.Context, flowerId int, newPrice float64) error {
 	var currentPrice float64
 	selectQuery := "SELECT price FROM flowers WHERE id=$1"
 
-	if err := r.db.QueryRow(selectQuery, flowerId).Scan(&currentPrice); err != nil {
+	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentPrice); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("flower not found")
 		}
@@ -157,16 +158,16 @@ func (r *FlowerPostgres) UpdatePrice(flowerId int, newPrice float64) error {
 	}
 
 	query := "UPDATE flowers SET price=$1 WHERE id=$2"
-	_, err := r.db.Exec(query, newPrice, flowerId)
+	_, err := r.db.ExecContext(ctx, query, newPrice, flowerId)
 
 	return err
 }
 
-func (r *FlowerPostgres) UpdateStock(flowerId int, newStock int) error {
+func (r *FlowerPostgres) UpdateStock(ctx context.Context, flowerId int, newStock int) error {
 	var currentStock int
 	selectQuery := "SELECT stock FROM flowers WHERE id=$1"
 
-	if err := r.db.QueryRow(selectQuery, flowerId).Scan(&currentStock); err != nil {
+	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentStock); err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("flower not found")
 		}
@@ -178,7 +179,7 @@ func (r *FlowerPostgres) UpdateStock(flowerId int, newStock int) error {
 	}
 
 	query := "UPDATE flowers SET stock=$1 WHERE id=$2"
-	_, err := r.db.Exec(query, newStock, flowerId)
+	_, err := r.db.ExecContext(ctx, query, newStock, flowerId)
 
 	return err
 }

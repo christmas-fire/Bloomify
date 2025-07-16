@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/gin-gonic/gin"
@@ -307,8 +306,6 @@ func (h *Handler) getMe(c *gin.Context) {
 	parentCtx := c.Request.Context()
 	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
 	defer cancel()
-
-	time.Sleep(1 * time.Second)
 
 	user, err := h.services.User.GetById(ctx, userId)
 	if err != nil {
