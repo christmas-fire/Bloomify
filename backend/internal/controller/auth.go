@@ -2,9 +2,9 @@ package controller
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,12 +35,12 @@ type SignInRequest struct {
 func (h *Handler) signUp(c *gin.Context) {
 	var req SignUpRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -50,12 +50,7 @@ func (h *Handler) signUp(c *gin.Context) {
 
 	id, err := h.services.Auth.CreateUser(ctx, req.Username, req.Email, req.Password)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -79,12 +74,12 @@ func (h *Handler) signUp(c *gin.Context) {
 func (h *Handler) signIn(c *gin.Context) {
 	var req SignInRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -94,17 +89,7 @@ func (h *Handler) signIn(c *gin.Context) {
 
 	token, err := h.services.Auth.GenerateToken(ctx, req.Username, req.Password)
 	if err != nil {
-		if errors.Is(err, errors.New("invalid username or password")) {
-			newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
-		}
-
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
-		return
+		newErrorResponse(c, h.logger, err)
 	}
 
 	c.JSON(http.StatusCreated, gin.H{

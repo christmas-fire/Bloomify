@@ -2,11 +2,14 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
+	"errors"
 	"log/slog"
 	"strings"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/christmas-fire/Bloomify/internal/models"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -25,15 +28,35 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, username, email, password
 
 	row := r.db.QueryRowxContext(ctx, query, username, email, password)
 	if err := row.Scan(&id); err != nil {
-		// Обрабатываем ошибку duplicate key value violates unique constraint "\field\"
-		if strings.Contains(err.Error(), "users_email_key") {
-			return 0, fmt.Errorf("user with email '%s' is already exists", email)
-		} else if strings.Contains(err.Error(), "users_username_key") {
-			return 0, fmt.Errorf("user with username '%s' is already exists", username)
-		} else {
-			return 0, err
+		if errors.Is(err, context.DeadlineExceeded) {
+			return 0, &apperror.TimeoutError{Err: err}
 		}
+
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" { // 23505 	unique_violation
+				if strings.Contains(pgErr.ConstraintName, "email") {
+					return 0, &apperror.AlreadyExistsError{
+						Err:    err,
+						Entity: "user",
+						Field:  "email",
+						Value:  email,
+					}
+				}
+
+				if strings.Contains(pgErr.ConstraintName, "username") {
+					return 0, &apperror.AlreadyExistsError{
+						Err:    err,
+						Entity: "user",
+						Field:  "username",
+						Value:  username,
+					}
+				}
+			}
+		}
+		return 0, &apperror.InternalServerError{Err: err}
 	}
+
 	return id, nil
 }
 
@@ -41,10 +64,18 @@ func (r *AuthPostgres) GetUser(ctx context.Context, username, password string) (
 	var user models.User
 	query := "SELECT * FROM users WHERE username=$1 AND password=$2"
 
-	err := r.db.GetContext(ctx, &user, query, username, password)
-	if err != nil {
-		return user, err
-	}
+	if err := r.db.GetContext(ctx, &user, query, username, password); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return user, &apperror.TimeoutError{Err: err}
+		}
 
+		if errors.Is(err, sql.ErrNoRows) {
+			return user, &apperror.NotFoundError{
+				Err:    err,
+				Entity: "user",
+			}
+		}
+		return user, &apperror.InternalServerError{Err: err}
+	}
 	return user, nil
 }

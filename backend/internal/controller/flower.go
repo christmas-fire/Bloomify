@@ -2,11 +2,10 @@ package controller
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/christmas-fire/Bloomify/internal/service"
 	"github.com/gin-gonic/gin"
@@ -75,18 +74,18 @@ func toFlowerResponse(flower models.Flower) FlowerResponse {
 func (h *Handler) createFlower(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	var req CreateFlowerRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -96,12 +95,7 @@ func (h *Handler) createFlower(c *gin.Context) {
 
 	id, err := h.services.Flower.CreateFlower(ctx, req.Name, req.Description, req.Price, req.Stock)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -129,7 +123,7 @@ func (h *Handler) createFlower(c *gin.Context) {
 func (h *Handler) getFlowers(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -141,7 +135,7 @@ func (h *Handler) getFlowers(c *gin.Context) {
 	if priceStr := c.Query("max_price"); priceStr != "" {
 		price, err := strconv.ParseFloat(priceStr, 64)
 		if err != nil {
-			newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid max_price format")
+			newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 			return
 		}
 		filter.MaxPrice = &price
@@ -150,7 +144,7 @@ func (h *Handler) getFlowers(c *gin.Context) {
 	if stockStr := c.Query("max_stock"); stockStr != "" {
 		stock, err := strconv.Atoi(stockStr)
 		if err != nil {
-			newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid max_stock format")
+			newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 			return
 		}
 		filter.MaxStock = &stock
@@ -162,12 +156,7 @@ func (h *Handler) getFlowers(c *gin.Context) {
 
 	flowers, err := h.services.Flower.Get(ctx, filter)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -200,13 +189,13 @@ func (h *Handler) getFlowers(c *gin.Context) {
 func (h *Handler) getFlowerById(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -216,17 +205,7 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 
 	flower, err := h.services.Flower.GetById(ctx, id)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Flower not found"})
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -250,24 +229,24 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 func (h *Handler) updateFlowerName(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdateNameRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -276,12 +255,7 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.Flower.UpdateName(ctx, id, req.NewName); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -305,24 +279,24 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 func (h *Handler) updateFlowerDescription(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdateDescriptionRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -331,12 +305,7 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.Flower.UpdateDescription(ctx, id, req.NewDescription); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -360,24 +329,24 @@ func (h *Handler) updateFlowerDescription(c *gin.Context) {
 func (h *Handler) updateFlowerPrice(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdatePriceRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -386,12 +355,7 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.Flower.UpdatePrice(ctx, id, req.NewPrice); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -415,24 +379,24 @@ func (h *Handler) updateFlowerPrice(c *gin.Context) {
 func (h *Handler) updateFlowerStock(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdateStockRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -441,12 +405,7 @@ func (h *Handler) updateFlowerStock(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.Flower.UpdateStock(ctx, id, req.NewStock); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -469,13 +428,13 @@ func (h *Handler) updateFlowerStock(c *gin.Context) {
 func (h *Handler) deleteFlower(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -484,12 +443,7 @@ func (h *Handler) deleteFlower(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.Flower.Delete(ctx, id); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 

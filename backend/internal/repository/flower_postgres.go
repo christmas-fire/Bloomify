@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -77,29 +78,49 @@ func (r *FlowerPostgres) Get(ctx context.Context, filter FlowerFilter) ([]models
 
 	query += " ORDER BY name ASC"
 
-	var flowers []models.Flower
-	err := r.db.SelectContext(ctx, &flowers, query, args...)
-
-	return flowers, err
+	flowers := make([]models.Flower, 0)
+	if err := r.db.SelectContext(ctx, &flowers, query, args...); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return flowers, &apperror.TimeoutError{Err: err}
+		}
+		return flowers, &apperror.InternalServerError{Err: err}
+	}
+	return flowers, nil
 }
 
 func (r *FlowerPostgres) GetById(ctx context.Context, flowerId int) (models.Flower, error) {
 	var flower models.Flower
 	query := "SELECT id, name, description, price, stock FROM flowers WHERE id=$1"
 
-	err := r.db.GetContext(ctx, &flower, query, flowerId)
+	if err := r.db.GetContext(ctx, &flower, query, flowerId); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return flower, &apperror.TimeoutError{Err: err}
+		}
 
-	return flower, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return flower, &apperror.NotFoundError{
+				Err:    err,
+				Entity: "flower",
+			}
+		}
+		return flower, &apperror.InternalServerError{Err: err}
+	}
+	return flower, nil
 }
 
 func (r *FlowerPostgres) Delete(ctx context.Context, flowerId int) error {
 	query := "DELETE FROM flowers WHERE id=$1"
 
-	_, err := r.db.ExecContext(ctx, query, flowerId)
-
-	return err
+	if _, err := r.db.ExecContext(ctx, query, flowerId); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return &apperror.TimeoutError{Err: err}
+		}
+		return &apperror.InternalServerError{Err: err}
+	}
+	return nil
 }
 
+// TODO: объединить эти 4 обновления в один обработчик по типу как сделан Get()
 func (r *FlowerPostgres) UpdateName(ctx context.Context, flowerId int, newName string) error {
 	var currentName string
 	selectQuery := "SELECT name FROM flowers WHERE id=$1"

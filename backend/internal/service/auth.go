@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"crypto/sha1"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/christmas-fire/Bloomify/internal/repository"
 	"github.com/dgrijalva/jwt-go"
 )
@@ -52,9 +52,11 @@ func (s *AuthService) generateToken(userId int) (string, error) {
 	)
 	signedToken, err := token.SignedString([]byte(signingKey))
 	if err != nil {
-		return "", fmt.Errorf("failed to sign access token: %w", err)
+		return "", &apperror.TokenError{
+			Err:     err,
+			Message: "failed to sign token",
+		}
 	}
-
 	return signedToken, nil
 }
 
@@ -63,28 +65,33 @@ func (s *AuthService) GenerateToken(ctx context.Context, username, password stri
 	if err != nil {
 		return "", err
 	}
-
 	return s.generateToken(user.Id)
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &customClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, &apperror.TokenError{
+				Err:     nil,
+				Message: "invalid signing method",
+			}
 		}
-
 		return []byte(signingKey), nil
 	})
 	if err != nil {
-		s.logger.Error("Error parsing token", "error", err)
-		return 0, err
+		return 0, &apperror.TokenError{
+			Err:     err,
+			Message: "error parse token",
+		}
 	}
 
 	claims, ok := token.Claims.(*customClaims)
 	if !ok {
-		return 0, errors.New("token claims are not of type *customClaims")
+		return 0, &apperror.TokenError{
+			Err:     nil,
+			Message: "invalid token claims",
+		}
 	}
-
 	return claims.UserId, nil
 }
 

@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"errors"
-	"net/http"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +23,7 @@ func (h *Handler) LoggingMiddleware() gin.HandlerFunc {
 
 		duration := time.Since(start)
 
-		h.logger.Info("Request completed",
+		h.logger.Info("request completed",
 			"method", c.Request.Method,
 			"path", c.Request.URL.Path,
 			"status", c.Writer.Status(),
@@ -41,19 +41,25 @@ func (h *Handler) userIdentity(c *gin.Context) {
 
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, "empty auth header")
+		newErrorResponse(c, h.logger, &apperror.TokenError{
+			Err:     nil,
+			Message: "empty auth header",
+		})
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, "invalid auth header")
+		newErrorResponse(c, h.logger, &apperror.TokenError{
+			Err:     nil,
+			Message: "invalid auth header",
+		})
 		return
 	}
 
 	userId, err := h.services.Auth.ParseToken(headerParts[1])
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -63,14 +69,16 @@ func (h *Handler) userIdentity(c *gin.Context) {
 func (h *Handler) getUserId(c *gin.Context) (int, error) {
 	id, ok := c.Get(userCtx)
 	if !ok {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, "user id not found")
-		return 0, errors.New("user id not found")
+		return 0, &apperror.InvalidCredentialsError{
+			Err: fmt.Errorf("user id not found"),
+		}
 	}
 
 	idInt, ok := id.(int)
 	if !ok {
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, "user id invalid type")
-		return 0, errors.New("user id invalid type")
+		return 0, &apperror.InvalidCredentialsError{
+			Err: fmt.Errorf("user id has invalid type"),
+		}
 	}
 
 	return idInt, nil

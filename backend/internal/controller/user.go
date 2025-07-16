@@ -2,11 +2,10 @@ package controller
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/christmas-fire/Bloomify/internal/apperror"
 	"github.com/christmas-fire/Bloomify/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -53,7 +52,7 @@ func toUserResponse(user models.User) UserResponse {
 func (h *Handler) getAllUsers(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -63,12 +62,7 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 
 	users, err := h.services.User.GetAll(ctx)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -100,13 +94,13 @@ func (h *Handler) getAllUsers(c *gin.Context) {
 func (h *Handler) getUserById(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -116,17 +110,7 @@ func (h *Handler) getUserById(c *gin.Context) {
 
 	user, err := h.services.User.GetById(ctx, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-			return
-		}
-
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -150,24 +134,24 @@ func (h *Handler) getUserById(c *gin.Context) {
 func (h *Handler) updateUserUsername(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdateUsernameRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -176,12 +160,7 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.User.UpdateUsername(ctx, id, req.OldUsername, req.NewUsername); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -205,24 +184,24 @@ func (h *Handler) updateUserUsername(c *gin.Context) {
 func (h *Handler) updateUserPassword(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	var req UpdatePasswordRequest
 	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -231,12 +210,7 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.User.UpdatePassword(ctx, id, req.Username, req.OldPassword, req.NewPassword); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -259,13 +233,13 @@ func (h *Handler) updateUserPassword(c *gin.Context) {
 func (h *Handler) deleteUser(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusBadRequest, "invalid id param")
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
 		return
 	}
 
@@ -274,12 +248,7 @@ func (h *Handler) deleteUser(c *gin.Context) {
 	defer cancel()
 
 	if err := h.services.User.Delete(ctx, id); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -299,7 +268,7 @@ func (h *Handler) deleteUser(c *gin.Context) {
 func (h *Handler) getMe(c *gin.Context) {
 	userId, err := h.getUserId(c)
 	if err != nil {
-		newErrorResponse(c, h.logger, http.StatusUnauthorized, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
@@ -309,12 +278,7 @@ func (h *Handler) getMe(c *gin.Context) {
 
 	user, err := h.services.User.GetById(ctx, userId)
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
-			newErrorResponse(c, h.logger, http.StatusGatewayTimeout, "timeout")
-			return
-		}
-
-		newErrorResponse(c, h.logger, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, h.logger, err)
 		return
 	}
 
