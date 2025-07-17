@@ -20,10 +20,18 @@ type FlowerPostgres struct {
 
 // Параметры для фильтрации списка цветов
 type FlowerFilter struct {
-	NameQuery        string   // Поиск по имени
-	DescriptionQuery string   // Поиск по описанию
-	MaxPrice         *float64 // Максимальная цена
-	MaxStock         *int     // Максимальное количество
+	Name        string   // Поиск по имени
+	Description string   // Поиск по описанию
+	MaxPrice    *float64 // Максимальная цена
+	MaxStock    *int     // Максимальное количество
+}
+
+// Поля для обновления данных цветка
+type UpdateFlowerInput struct {
+	Name        *string  // Название
+	Description *string  // Описание
+	Price       *float64 // Цена
+	Stock       *int     // Кол-во в наличии
 }
 
 func NewFlowerPostgres(db *sqlx.DB, logger *slog.Logger) *FlowerPostgres {
@@ -49,18 +57,18 @@ func (r *FlowerPostgres) CreateFlower(ctx context.Context, name, description str
 
 func (r *FlowerPostgres) Get(ctx context.Context, filter FlowerFilter) ([]models.Flower, error) {
 	query := "SELECT id, name, description, price, stock FROM flowers WHERE 1=1"
-	args := []interface{}{}
+	args := make([]any, 0)
 	argId := 1
 
-	if filter.NameQuery != "" {
+	if filter.Name != "" {
 		query += fmt.Sprintf(" AND name ILIKE $%d", argId) // ILIKE для регистронезависимого поиска
-		args = append(args, "%"+filter.NameQuery+"%")      // % для поиска по подстроке
+		args = append(args, "%"+filter.Name+"%")           // % для поиска по подстроке
 		argId++
 	}
 
-	if filter.DescriptionQuery != "" {
+	if filter.Description != "" {
 		query += fmt.Sprintf(" AND description ILIKE $%d", argId)
-		args = append(args, "%"+filter.DescriptionQuery+"%")
+		args = append(args, "%"+filter.Description+"%")
 		argId++
 	}
 
@@ -120,87 +128,58 @@ func (r *FlowerPostgres) Delete(ctx context.Context, flowerId int) error {
 	return nil
 }
 
-// TODO: объединить эти 4 обновления в один обработчик по типу как сделан Get()
-func (r *FlowerPostgres) UpdateName(ctx context.Context, flowerId int, newName string) error {
-	var currentName string
-	selectQuery := "SELECT name FROM flowers WHERE id=$1"
+func (r *FlowerPostgres) Update(ctx context.Context, id int, input UpdateFlowerInput) error {
+	setValues := make([]string, 0)
+	args := make([]any, 0)
+	argId := 1
 
-	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentName); err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("flower not found")
+	if input.Name != nil {
+		setValues = append(setValues, fmt.Sprintf("name=$%d", argId))
+		args = append(args, *input.Name)
+		argId++
+	}
+	if input.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *input.Description)
+		argId++
+	}
+	if input.Price != nil {
+		setValues = append(setValues, fmt.Sprintf("price=$%d", argId))
+		args = append(args, *input.Price)
+		argId++
+	}
+	if input.Stock != nil {
+		setValues = append(setValues, fmt.Sprintf("stock=$%d", argId))
+		args = append(args, *input.Stock)
+		argId++
+	}
+
+	if len(setValues) == 0 {
+		return nil
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+	query := fmt.Sprintf("UPDATE flowers SET %s WHERE id=$%d", setQuery, argId)
+
+	args = append(args, id)
+	res, err := r.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return &apperror.TimeoutError{Err: err}
 		}
-		return fmt.Errorf("failed to get current flower's name: %w", err)
+		return &apperror.InternalServerError{Err: err}
 	}
 
-	if newName == currentName {
-		return errors.New("you have no changes")
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return &apperror.InternalServerError{Err: err}
 	}
-
-	query := "UPDATE flowers SET name=$1 WHERE id=$2"
-	_, err := r.db.ExecContext(ctx, query, newName, flowerId)
-
-	return err
-}
-
-func (r *FlowerPostgres) UpdateDescription(ctx context.Context, flowerId int, newDescription string) error {
-	var currentDescription string
-	selectQuery := "SELECT description FROM flowers WHERE id=$1"
-
-	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentDescription); err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("flower not found")
+	if rowsAffected == 0 {
+		return &apperror.NotFoundError{
+			Err:    nil,
+			Entity: "flower",
 		}
-		return fmt.Errorf("failed to get current flower's description: %w", err)
 	}
 
-	if newDescription == currentDescription {
-		return errors.New("you have no changes")
-	}
-
-	query := "UPDATE flowers SET description=$1 WHERE id=$2"
-	_, err := r.db.ExecContext(ctx, query, newDescription, flowerId)
-
-	return err
-}
-
-func (r *FlowerPostgres) UpdatePrice(ctx context.Context, flowerId int, newPrice float64) error {
-	var currentPrice float64
-	selectQuery := "SELECT price FROM flowers WHERE id=$1"
-
-	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentPrice); err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("flower not found")
-		}
-		return fmt.Errorf("failed to get current flower's price: %w", err)
-	}
-
-	if newPrice == currentPrice {
-		return errors.New("you have no changes")
-	}
-
-	query := "UPDATE flowers SET price=$1 WHERE id=$2"
-	_, err := r.db.ExecContext(ctx, query, newPrice, flowerId)
-
-	return err
-}
-
-func (r *FlowerPostgres) UpdateStock(ctx context.Context, flowerId int, newStock int) error {
-	var currentStock int
-	selectQuery := "SELECT stock FROM flowers WHERE id=$1"
-
-	if err := r.db.QueryRowxContext(ctx, selectQuery, flowerId).Scan(&currentStock); err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("flower not found")
-		}
-		return fmt.Errorf("failed to get current flower's stock: %w", err)
-	}
-
-	if newStock == currentStock {
-		return errors.New("you have no changes")
-	}
-
-	query := "UPDATE flowers SET stock=$1 WHERE id=$2"
-	_, err := r.db.ExecContext(ctx, query, newStock, flowerId)
-
-	return err
+	return nil
 }

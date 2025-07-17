@@ -21,6 +21,14 @@ type FlowerFilter struct {
 	MaxStock    *int     // Максимальное количество
 }
 
+// Поля для обновления данных цветка
+type UpdateFlowerInput struct {
+	Name        *string  // Название
+	Description *string  // Описание
+	Price       *float64 // Цена
+	Stock       *int     // Кол-во в наличии
+}
+
 func NewFlowerService(repo repository.Flower, logger *slog.Logger) *FlowerService {
 	return &FlowerService{repo: repo, logger: logger}
 }
@@ -31,10 +39,10 @@ func (s *FlowerService) CreateFlower(ctx context.Context, name, description stri
 
 func (s *FlowerService) Get(ctx context.Context, filter FlowerFilter) ([]models.Flower, error) {
 	repoFilter := repository.FlowerFilter{
-		NameQuery:        filter.Name,
-		DescriptionQuery: filter.Description,
-		MaxPrice:         filter.MaxPrice,
-		MaxStock:         filter.MaxStock,
+		Name:        filter.Name,
+		Description: filter.Description,
+		MaxPrice:    filter.MaxPrice,
+		MaxStock:    filter.MaxStock,
 	}
 	return s.repo.Get(ctx, repoFilter)
 }
@@ -47,18 +55,12 @@ func (s *FlowerService) Delete(ctx context.Context, flowerId int) error {
 	return s.repo.Delete(ctx, flowerId)
 }
 
-func (s *FlowerService) UpdateName(ctx context.Context, flowerId int, newName string) error {
-	return s.repo.UpdateName(ctx, flowerId, newName)
-}
-
-func (s *FlowerService) UpdateDescription(ctx context.Context, flowerId int, newDescription string) error {
-	return s.repo.UpdateDescription(ctx, flowerId, newDescription)
-}
-
-func (s *FlowerService) UpdatePrice(ctx context.Context, flowerId int, newPrice float64) error {
-	return s.repo.UpdatePrice(ctx, flowerId, newPrice)
-}
-
-func (s *FlowerService) UpdateStock(ctx context.Context, flowerId int, newStock int) error {
-	return s.repo.UpdateStock(ctx, flowerId, newStock)
+func (s *FlowerService) Update(ctx context.Context, flowerId int, input UpdateFlowerInput) error {
+	repoInput := repository.UpdateFlowerInput{
+		Name:        input.Name,
+		Description: input.Description,
+		Price:       input.Price,
+		Stock:       input.Stock,
+	}
+	return s.repo.Update(ctx, flowerId, repoInput)
 }

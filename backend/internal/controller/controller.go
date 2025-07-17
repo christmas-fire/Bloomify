@@ -85,10 +85,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 				flowers.POST("/", h.createFlower)
 				flowers.GET("/", h.getFlowers)
 				flowers.GET("/:id", h.getFlowerById)
-				flowers.PATCH("/:id/name", h.updateFlowerName)
-				flowers.PATCH("/:id/description", h.updateFlowerDescription)
-				flowers.PATCH("/:id/price", h.updateFlowerPrice)
-				flowers.PATCH("/:id/stock", h.updateFlowerStock)
+				flowers.PATCH("/:id", h.updateFlower)
 				flowers.DELETE("/:id", h.deleteFlower)
 			}
 		}

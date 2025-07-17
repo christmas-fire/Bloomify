@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,24 +29,12 @@ type CreateFlowerRequest struct {
 	Stock       int     `json:"stock" binding:"required" validate:"required,gte=0"`       // Кол-во в наличии
 }
 
-// DTO для обновления имени цветка
-type UpdateNameRequest struct {
-	NewName string `json:"newName" binding:"required" validate:"required,min=3,max=50"` // Новое название
-}
-
-// DTO для обновления описания цветка
-type UpdateDescriptionRequest struct {
-	NewDescription string `json:"newDescription" binding:"required" validate:"required,max=1024"` // Новое описание
-}
-
-// DTO для обновления цены цветка
-type UpdatePriceRequest struct {
-	NewPrice float64 `json:"newPrice" binding:"required" validate:"required,gt=0"` // Новая цена
-}
-
-// DTO для обновления количества цветка в наличии
-type UpdateStockRequest struct {
-	NewStock int `json:"newStock" binding:"required" validate:"required,gte=0"` // Новое количество в наличии
+// DTO для обновления данных цветка
+type UpdateFlowerRequest struct {
+	Name        *string  `json:"name" validate:"omitempty,min=3,max=50"`    // Новое название
+	Description *string  `json:"description" validate:"omitempty,max=1024"` // Новое описание
+	Price       *float64 `json:"price" validate:"omitempty,gt=0"`           // Новая цена
+	Stock       *int     `json:"stock" validate:"omitempty,gte=0"`          // Новое кол-во в наличии
 }
 
 func toFlowerResponse(flower models.Flower) FlowerResponse {
@@ -212,21 +201,22 @@ func (h *Handler) getFlowerById(c *gin.Context) {
 	c.JSON(http.StatusOK, toFlowerResponse(flower))
 }
 
-// UpdateFlowerName godoc
-// @Summary Update flower's name
-// @Description Update the name of a specific flower by its ID
+// updateFlower godoc
+// @Summary Partially update a flower
+// @Description Update one or more fields of a flower by its ID. Only include the fields you want to change.
 // @Tags flowers
 // @Accept json
 // @Produce json
 // @Param id path int true "Flower ID"
-// @Param input body UpdateNameRequest true "Update Flower Name Input"
-// @Success 200 {object} map[string]string "OK"
+// @Param input body UpdateFlowerRequest true "Fields to update"
+// @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Bad Request"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Not Found"
 // @Failure 500 {object} map[string]string "Internal Server Error"
 // @Security BearerAuth
-// @Router /api/v1/flowers/{id}/name [patch]
-func (h *Handler) updateFlowerName(c *gin.Context) {
+// @Router /api/v1/flowers/{id} [patch]
+func (h *Handler) updateFlower(c *gin.Context) {
 	_, err := h.getUserId(c)
 	if err != nil {
 		newErrorResponse(c, h.logger, err)
@@ -239,9 +229,15 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 		return
 	}
 
-	var req UpdateNameRequest
+	var req UpdateFlowerRequest
 	if err := c.BindJSON(&req); err != nil {
 		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
+		return
+	}
+
+	// Проверяем, что хотя бы одно поле было передано для обновления
+	if req.Name == nil && req.Description == nil && req.Price == nil && req.Stock == nil {
+		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: fmt.Errorf("update body is empty")})
 		return
 	}
 
@@ -254,157 +250,14 @@ func (h *Handler) updateFlowerName(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
 	defer cancel()
 
-	if err := h.services.Flower.UpdateName(ctx, id, req.NewName); err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
+	input := service.UpdateFlowerInput{
+		Name:        req.Name,
+		Description: req.Description,
+		Price:       req.Price,
+		Stock:       req.Stock,
 	}
 
-	c.Status(http.StatusNoContent)
-}
-
-// UpdateFlowerDescription godoc
-// @Summary Update flower's description
-// @Description Update the description of a specific flower by its ID
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param id path int true "Flower ID"
-// @Param input body UpdateDescriptionRequest true "Update Flower Description Input"
-// @Success 200 {object} map[string]string "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/{id}/description [patch]
-func (h *Handler) updateFlowerDescription(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	var req UpdateDescriptionRequest
-	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	parentCtx := c.Request.Context()
-	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
-	defer cancel()
-
-	if err := h.services.Flower.UpdateDescription(ctx, id, req.NewDescription); err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
-
-// UpdateFlowerPrice godoc
-// @Summary Update flower's price
-// @Description Update the price of a specific flower by its ID
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param id path int true "Flower ID"
-// @Param input body UpdatePriceRequest true "Update Flower Price Input"
-// @Success 200 {object} map[string]string "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/{id}/price [patch]
-func (h *Handler) updateFlowerPrice(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	var req UpdatePriceRequest
-	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	parentCtx := c.Request.Context()
-	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
-	defer cancel()
-
-	if err := h.services.Flower.UpdatePrice(ctx, id, req.NewPrice); err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
-	}
-
-	c.Status(http.StatusNoContent)
-}
-
-// UpdateFlowerStock godoc
-// @Summary Update flower's stock
-// @Description Update the stock level of a specific flower by its ID
-// @Tags flowers
-// @Accept json
-// @Produce json
-// @Param id path int true "Flower ID"
-// @Param input body UpdateStockRequest true "Update Flower Stock Input"
-// @Success 200 {object} map[string]string "OK"
-// @Failure 400 {object} map[string]string "Bad Request"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal Server Error"
-// @Security BearerAuth
-// @Router /api/v1/flowers/{id}/stock [patch]
-func (h *Handler) updateFlowerStock(c *gin.Context) {
-	_, err := h.getUserId(c)
-	if err != nil {
-		newErrorResponse(c, h.logger, err)
-		return
-	}
-
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	var req UpdateStockRequest
-	if err := c.BindJSON(&req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	if err := h.validator.Struct(req); err != nil {
-		newErrorResponse(c, h.logger, &apperror.BadRequestError{Err: err})
-		return
-	}
-
-	parentCtx := c.Request.Context()
-	ctx, cancel := context.WithTimeout(parentCtx, defaultTimeout)
-	defer cancel()
-
-	if err := h.services.Flower.UpdateStock(ctx, id, req.NewStock); err != nil {
+	if err := h.services.Flower.Update(ctx, id, input); err != nil {
 		newErrorResponse(c, h.logger, err)
 		return
 	}
