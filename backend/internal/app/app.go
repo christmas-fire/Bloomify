@@ -40,11 +40,6 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	if err := database.InitTables(db); err != nil {
-		db.Close()
-		return nil, err
-	}
-
 	validator := validator.New()
 	metrics := metrics.NewMetrics()
 	repository := repository.NewRepository(db, logger)

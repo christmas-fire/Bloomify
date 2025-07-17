@@ -90,6 +90,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	token, err := h.services.Auth.GenerateToken(ctx, req.Username, req.Password)
 	if err != nil {
 		newErrorResponse(c, h.logger, err)
+		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{

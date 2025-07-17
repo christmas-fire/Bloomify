@@ -9,8 +9,8 @@ services:
       SALT: ${SALT}
       SIGNING_KEY: ${SIGNING_KEY}
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   # frontend:
   #   build: ./frontend
@@ -36,6 +36,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  migrate:
+    image: migrate/migrate
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+    volumes:
+      - ./backend/internal/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "${POSTGRES_DSN}", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
   
   nocodb:
     image: nocodb/nocodb:latest
@@ -89,3 +100,4 @@ volumes:
   nocodb_data: {}
   loki_data: {}
   promtail_positions: {}
+  
